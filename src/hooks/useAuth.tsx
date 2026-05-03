@@ -7,7 +7,7 @@ type AuthCtx = {
   session: Session | null;
   isAdmin: boolean;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: string | null; isAdmin: boolean }>;
   signOut: () => Promise<void>;
 };
 
@@ -20,37 +20,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        checkAdmin(session.user.id).finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
+    });
+
+    // Listen for auth changes (login/logout)
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        setTimeout(() => checkAdmin(s.user.id), 0);
+        checkAdmin(s.user.id);
       } else {
         setIsAdmin(false);
       }
     });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) checkAdmin(session.user.id).finally(() => setLoading(false));
-      else setLoading(false);
-    });
+
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  const checkAdmin = async (uid: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", uid)
-      .eq("role", "admin")
-      .maybeSingle();
+  const checkAdmin = async (uid: string): Promise<boolean> => {
+    const { data } = await supabase.rpc("has_role", { _user_id: uid, _role: "admin" });
     setIsAdmin(!!data);
+    return !!data;
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message, isAdmin: false };
+    const admin = data.user ? await checkAdmin(data.user.id) : false;
+    return { error: null, isAdmin: admin };
   };
 
   const signOut = async () => {
