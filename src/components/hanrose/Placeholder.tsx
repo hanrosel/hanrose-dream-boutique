@@ -34,9 +34,11 @@ export const Placeholder = ({
       <img
         src={logo}
         alt="Hanrose Atelier"
-        className="relative w-2/3 max-w-[260px] object-contain drop-shadow-sm"
+        loading="lazy"
+        decoding="async"
+        className="relative w-[88%] max-w-[420px] object-contain drop-shadow-md"
       />
-      <span className="relative mt-2 font-serif text-xs tracking-[0.2em] uppercase text-foreground/50 italic px-4 text-center">
+      <span className="relative mt-3 font-serif text-xs tracking-[0.25em] uppercase text-foreground/50 italic px-4 text-center">
         {label}
       </span>
       <Icon className="hidden" />
