@@ -12,9 +12,6 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
 import { Plus, Pencil, Trash2, Download, Upload, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -67,6 +64,7 @@ export default function AdminProducts() {
   const [catFilter, setCatFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [importOpen, setImportOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   // Filtering
   const filtered = products.filter((p) => {
@@ -280,115 +278,125 @@ export default function AdminProducts() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-serif text-3xl">Products</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={exportCSV}><Download className="h-4 w-4 mr-1" />CSV</Button>
-          <Button variant="outline" size="sm" onClick={exportJSON}><Download className="h-4 w-4 mr-1" />JSON</Button>
-          <Button variant="outline" size="sm" onClick={downloadTemplate}><Download className="h-4 w-4 mr-1" />Template</Button>
-          <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
-            <Upload className="h-4 w-4 mr-1" />Import
-          </Button>
-          <input ref={jsonRef} type="file" accept=".json" className="hidden" onChange={handleImportJSON} />
-          <input ref={csvRef}  type="file" accept=".csv"  className="hidden" onChange={handleImportCSV} />
-          <Button variant="hanrose" size="sm" onClick={() => start()}><Plus className="h-4 w-4 mr-1" />Add</Button>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-4">
+      {/* ── HEADER: 1 baris compact ── */}
+      <div className="flex items-center gap-1.5 flex-wrap mb-2">
+        <h1 className="font-serif text-lg mr-1">Products</h1>
+        {/* Search */}
         <Input
-          placeholder="Cari nama / slug..."
+          placeholder="Cari..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); resetPage(); }}
-          className="w-56"
+          className="h-7 text-xs w-24 min-w-0"
         />
+        {/* Status filter */}
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); resetPage(); }}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="h-7 text-xs w-20 min-w-0 px-2"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Semua status</SelectItem>
+            <SelectItem value="all">Status</SelectItem>
             <SelectItem value="new">New</SelectItem>
             <SelectItem value="limited">Limited</SelectItem>
             <SelectItem value="preloved">Preloved</SelectItem>
-            <SelectItem value="sold">Sold out</SelectItem>
+            <SelectItem value="sold">Sold</SelectItem>
           </SelectContent>
         </Select>
+        {/* Cat filter */}
         <Select value={catFilter} onValueChange={(v) => { setCatFilter(v); resetPage(); }}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="Kategori" /></SelectTrigger>
+          <SelectTrigger className="h-7 text-xs w-20 min-w-0 px-2"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Semua kategori</SelectItem>
+            <SelectItem value="all">Kategori</SelectItem>
             {cats.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
-        <span className="text-sm text-muted-foreground self-center">{filtered.length} produk</span>
+        <span className="text-[11px] text-muted-foreground">{filtered.length}</span>
+        {/* Spacer */}
+        <div className="flex-1" />
+        {/* Export */}
+        <Button variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => setExportOpen(true)}>
+          <Download className="h-3 w-3 mr-1" />Export
+        </Button>
+        {/* Import */}
+        <Button variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => setImportOpen(true)}>
+          <Upload className="h-3 w-3 mr-1" />Import
+        </Button>
+        <input ref={jsonRef} type="file" accept=".json" className="hidden" onChange={handleImportJSON} />
+        <input ref={csvRef}  type="file" accept=".csv"  className="hidden" onChange={handleImportCSV} />
+        {/* Add */}
+        <Button variant="hanrose" size="sm" className="h-7 px-2 text-xs" onClick={() => start()}>
+          <Plus className="h-3 w-3 mr-1" />Add
+        </Button>
       </div>
 
-      {/* Table */}
-      <div className="rounded-xl border overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12"></TableHead>
-              <TableHead>Nama</TableHead>
-              <TableHead>Kategori</TableHead>
-              <TableHead>Harga</TableHead>
-              <TableHead>Stock</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Featured</TableHead>
-              <TableHead>Homepage</TableHead>
-              <TableHead className="w-20"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+      {/* ── TABLE ── */}
+      <div className="rounded-xl border overflow-x-auto">
+        <table className="w-full" style={{ fontSize: "11px" }}>
+          <thead>
+            <tr className="border-b bg-muted/40 text-muted-foreground">
+              <th className="w-8 p-1"></th>
+              <th className="p-1 text-left font-medium">Nama</th>
+              <th className="p-1 text-left font-medium hidden sm:table-cell">Kat.</th>
+              <th className="p-1 text-left font-medium">Harga</th>
+              <th className="p-1 text-left font-medium hidden sm:table-cell">Stok</th>
+              <th className="p-1 text-left font-medium">Status</th>
+              <th className="p-1 w-12"></th>
+            </tr>
+          </thead>
+          <tbody>
             {paginated.length === 0 && (
-              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-10">Tidak ada produk</TableCell></TableRow>
+              <tr><td colSpan={7} className="text-center text-muted-foreground py-6 text-xs">Tidak ada produk</td></tr>
             )}
             {paginated.map((p) => (
-              <TableRow key={p.id}>
-                <TableCell>
+              <tr key={p.id} className="border-b last:border-0 hover:bg-muted/20">
+                {/* Foto */}
+                <td className="p-1">
                   {p.images?.[0]
-                    ? <img src={p.images[0]} alt="" className="h-10 w-10 rounded-lg object-cover" />
-                    : <div className="h-10 w-10 rounded-lg bg-muted" />}
-                </TableCell>
-                <TableCell>
-                  <div className="font-medium">{p.name}</div>
-                  <div className="text-xs text-muted-foreground">{p.slug}</div>
-                </TableCell>
-                <TableCell className="text-sm">{cats.find((c) => c.id === p.category_id)?.name ?? "—"}</TableCell>
-                <TableCell className="text-sm">Rp {p.price?.toLocaleString("id-ID") ?? "—"}</TableCell>
-                <TableCell className="text-sm">{p.stock}</TableCell>
-                <TableCell>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-muted capitalize">{p.status}</span>
-                </TableCell>
-                <TableCell className="text-sm">{p.featured ? "✓" : "—"}</TableCell>
-                <TableCell className="text-xs text-muted-foreground space-x-1">
-                  {p.show_in_hero && <span className="px-1.5 py-0.5 rounded bg-pink/20 text-pink">Hero</span>}
-                  {p.show_in_collection && <span className="px-1.5 py-0.5 rounded bg-blue/20 text-blue">Col</span>}
-                  {p.show_in_lookbook && <span className="px-1.5 py-0.5 rounded bg-muted">Look</span>}
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Button size="sm" variant="outline" onClick={() => start(p)}><Pencil className="h-3 w-3" /></Button>
-                    <Button size="sm" variant="outline" onClick={() => del(p.id)}><Trash2 className="h-3 w-3" /></Button>
+                    ? <img src={p.images[0]} alt="" className="h-8 w-8 rounded object-cover" />
+                    : <div className="h-8 w-8 rounded bg-muted" />}
+                </td>
+                {/* Nama */}
+                <td className="p-1 max-w-[110px]">
+                  <div className="font-medium leading-tight truncate">{p.name}</div>
+                  <div className="text-muted-foreground truncate" style={{ fontSize: "10px" }}>{p.slug}</div>
+                </td>
+                {/* Kategori */}
+                <td className="p-1 hidden sm:table-cell text-muted-foreground truncate max-w-[60px]">
+                  {cats.find((c) => c.id === p.category_id)?.name ?? "—"}
+                </td>
+                {/* Harga */}
+                <td className="p-1 whitespace-nowrap">
+                  {p.price ? `Rp ${p.price.toLocaleString("id-ID")}` : "—"}
+                </td>
+                {/* Stok */}
+                <td className="p-1 hidden sm:table-cell">{p.stock}</td>
+                {/* Status */}
+                <td className="p-1">
+                  <span className="px-1 py-0.5 rounded bg-muted capitalize">{p.status}</span>
+                </td>
+                {/* Actions */}
+                <td className="p-1">
+                  <div className="flex gap-0.5">
+                    <button onClick={() => start(p)} className="p-1 rounded border hover:bg-muted">
+                      <Pencil className="h-3 w-3" />
+                    </button>
+                    <button onClick={() => del(p.id)} className="p-1 rounded border hover:bg-red-50 text-destructive">
+                      <Trash2 className="h-3 w-3" />
+                    </button>
                   </div>
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between mt-4">
-        <span className="text-sm text-muted-foreground">
-          Halaman {page} dari {totalPages}
-        </span>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
-            <ChevronLeft className="h-4 w-4" />
+      <div className="flex items-center justify-between mt-2">
+        <span className="text-xs text-muted-foreground">{page}/{totalPages} · {filtered.length} produk</span>
+        <div className="flex gap-1">
+          <Button variant="outline" size="sm" className="h-6 w-6 p-0" disabled={page === 1} onClick={() => setPage(page - 1)}>
+            <ChevronLeft className="h-3 w-3" />
           </Button>
-          <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
-            <ChevronRight className="h-4 w-4" />
+          <Button variant="outline" size="sm" className="h-6 w-6 p-0" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
+            <ChevronRight className="h-3 w-3" />
           </Button>
         </div>
       </div>
@@ -481,32 +489,48 @@ export default function AdminProducts() {
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle>Import Produk</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            Pilih format file yang ingin diimport. Gunakan tombol <strong>Template</strong> untuk download contoh format yang benar.
-          </p>
+          <p className="text-sm text-muted-foreground">Pilih format file yang ingin diimport.</p>
           <div className="grid grid-cols-2 gap-3 mt-2">
-            <Button
-              variant="outline"
-              className="h-20 flex-col gap-2"
-              onClick={() => { setImportOpen(false); setTimeout(() => jsonRef.current?.click(), 100); }}
-            >
-              <Upload className="h-5 w-5" />
+            <Button variant="outline" className="h-16 flex-col gap-1.5"
+              onClick={() => { setImportOpen(false); setTimeout(() => jsonRef.current?.click(), 100); }}>
+              <Upload className="h-4 w-4" />
               <span className="text-sm font-medium">JSON</span>
-              <span className="text-xs text-muted-foreground">.json</span>
             </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex-col gap-2"
-              onClick={() => { setImportOpen(false); setTimeout(() => csvRef.current?.click(), 100); }}
-            >
-              <Upload className="h-5 w-5" />
+            <Button variant="outline" className="h-16 flex-col gap-1.5"
+              onClick={() => { setImportOpen(false); setTimeout(() => csvRef.current?.click(), 100); }}>
+              <Upload className="h-4 w-4" />
               <span className="text-sm font-medium">CSV</span>
-              <span className="text-xs text-muted-foreground">.csv</span>
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Import akan upsert berdasarkan <code className="bg-muted px-1 rounded">slug</code> — produk yang sudah ada akan diupdate, yang baru akan ditambahkan.
+          <div className="border-t pt-3 mt-1">
+            <p className="text-xs text-muted-foreground mb-2">Belum punya template? Download dulu:</p>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => { downloadTemplate(); }}>
+              <Download className="h-3.5 w-3.5 mr-2" />Download Template CSV
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Upsert by <code className="bg-muted px-1 rounded">slug</code> — produk lama diupdate, baru ditambah.
           </p>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader><DialogTitle>Export Produk</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">{products.length} produk akan diexport.</p>
+          <div className="grid grid-cols-2 gap-3 mt-2">
+            <Button variant="outline" className="h-16 flex-col gap-1.5"
+              onClick={() => { exportCSV(); setExportOpen(false); }}>
+              <Download className="h-4 w-4" />
+              <span className="text-sm font-medium">CSV</span>
+            </Button>
+            <Button variant="outline" className="h-16 flex-col gap-1.5"
+              onClick={() => { exportJSON(); setExportOpen(false); }}>
+              <Download className="h-4 w-4" />
+              <span className="text-sm font-medium">JSON</span>
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
