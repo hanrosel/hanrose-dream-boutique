@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Navbar } from "@/components/hanrose/Navbar";
 import { Hero } from "@/components/hanrose/Hero";
 import { TrustStrip } from "@/components/hanrose/TrustStrip";
@@ -16,6 +17,17 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Index = () => {
   const { data: s } = useSiteSettings();
+  const location = useLocation();
+
+  // Scroll to hash section after navigating from another page (e.g. /#new)
+  useEffect(() => {
+    const hash = location.hash.replace("#", "");
+    if (!hash) return;
+    const el = document.getElementById(hash);
+    if (el) {
+      setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }, [location.hash]);
   useEffect(() => {
     if (!s) return;
     if (s.meta_title) document.title = s.meta_title;

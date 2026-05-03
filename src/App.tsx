@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import CollectionsPage from "./pages/Collections.tsx";
 import AdminLogin from "./pages/admin/Login.tsx";
 import AdminLayout from "./pages/admin/Layout.tsx";
 import AdminDashboard from "./pages/admin/Dashboard.tsx";
@@ -26,6 +27,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/collections" element={<CollectionsPage />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />

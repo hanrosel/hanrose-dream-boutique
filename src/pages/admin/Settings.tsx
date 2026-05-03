@@ -64,6 +64,24 @@ export default function AdminSettings() {
         <div><Label>About text</Label><Textarea rows={4} value={form.about_text ?? ""} onChange={(e) => set("about_text", e.target.value)} /></div>
       </Card>
 
+      <Card className="p-6 rounded-2xl space-y-4 mb-6">
+        <h2 className="font-serif text-xl">About Section — Foto</h2>
+        <p className="text-sm text-muted-foreground">Upload foto untuk section About/Brand Story. Bisa banyak — otomatis jadi slide.</p>
+        <div>
+          <Label>Foto About (slide)</Label>
+          <ImageUpload
+            value={form.about_images ?? []}
+            onChange={(v) => set("about_images", v)}
+            multiple={true}
+            folder="about"
+          />
+        </div>
+        <div>
+          <Label>URL tujuan saat foto diklik</Label>
+          <Input value={form.about_link_url ?? ""} onChange={(e) => set("about_link_url", e.target.value || null)} placeholder="https://..." />
+        </div>
+      </Card>
+
       <Button variant="hanrose" size="lg" onClick={save}>Save settings</Button>
     </div>
   );

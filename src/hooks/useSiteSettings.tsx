@@ -17,6 +17,8 @@ export type SiteSettings = {
   hero_headline: string | null;
   hero_subtext: string | null;
   about_text: string | null;
+  about_images: string[];
+  about_link_url: string | null;
 };
 
 export const useSiteSettings = () => {

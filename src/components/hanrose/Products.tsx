@@ -60,7 +60,7 @@ export const Products = () => {
         </p>
       </div>
 
-      <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="mt-12 grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
         {products.map((p, i) => (
           <article
             key={p.id}

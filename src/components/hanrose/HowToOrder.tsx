@@ -17,7 +17,7 @@ export const HowToOrder = () => (
         Simple, personal, dan dilayani langsung oleh owner.
       </p>
     </div>
-    <ol className="mt-12 grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
+    <ol className="mt-12 grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-5">
       {steps.map((s, i) => (
         <li
           key={s.n}

@@ -95,8 +95,12 @@ export type Database = {
           featured: boolean
           id: string
           images: string[]
+          link_url: string | null
           name: string
           price: number | null
+          show_in_collection: boolean
+          show_in_hero: boolean
+          show_in_lookbook: boolean
           slug: string
           sort_order: number
           status: string
@@ -111,8 +115,12 @@ export type Database = {
           featured?: boolean
           id?: string
           images?: string[]
+          link_url?: string | null
           name: string
           price?: number | null
+          show_in_collection?: boolean
+          show_in_hero?: boolean
+          show_in_lookbook?: boolean
           slug: string
           sort_order?: number
           status?: string
@@ -127,8 +135,12 @@ export type Database = {
           featured?: boolean
           id?: string
           images?: string[]
+          link_url?: string | null
           name?: string
           price?: number | null
+          show_in_collection?: boolean
+          show_in_hero?: boolean
+          show_in_lookbook?: boolean
           slug?: string
           sort_order?: number
           status?: string
@@ -170,6 +182,7 @@ export type Database = {
           id: string
           name: string
           rating: number
+          screenshot: string[]
           sort_order: number
           text: string
           updated_at: string
@@ -180,6 +193,7 @@ export type Database = {
           id?: string
           name: string
           rating?: number
+          screenshot?: string[]
           sort_order?: number
           text: string
           updated_at?: string
@@ -190,6 +204,7 @@ export type Database = {
           id?: string
           name?: string
           rating?: number
+          screenshot?: string[]
           sort_order?: number
           text?: string
           updated_at?: string
@@ -198,6 +213,8 @@ export type Database = {
       }
       site_settings: {
         Row: {
+          about_images: string[]
+          about_link_url: string | null
           about_text: string | null
           email: string | null
           hero_headline: string | null
@@ -217,6 +234,8 @@ export type Database = {
           whatsapp_number: string
         }
         Insert: {
+          about_images?: string[]
+          about_link_url?: string | null
           about_text?: string | null
           email?: string | null
           hero_headline?: string | null
@@ -236,6 +255,8 @@ export type Database = {
           whatsapp_number?: string
         }
         Update: {
+          about_images?: string[]
+          about_link_url?: string | null
           about_text?: string | null
           email?: string | null
           hero_headline?: string | null

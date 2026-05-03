@@ -1,7 +1,8 @@
+import { Link } from "react-router-dom";
 import logo from "@/assets/hanrose-logo.png";
 
 export const Logo = ({ className = "" }: { className?: string }) => (
-  <a href="#top" className={`flex items-center gap-2 ${className}`} aria-label="Hanrose Atelier">
+  <Link to="/" className={`flex items-center gap-2 ${className}`} aria-label="Hanrose Atelier">
     <img
       src={logo}
       alt="Hanrose Atelier logo"
@@ -9,5 +10,5 @@ export const Logo = ({ className = "" }: { className?: string }) => (
       loading="eager"
       decoding="async"
     />
-  </a>
+  </Link>
 );
