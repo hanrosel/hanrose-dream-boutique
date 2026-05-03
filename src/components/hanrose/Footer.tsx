@@ -8,7 +8,7 @@ export const Footer = () => (
     <div className="container py-16 grid md:grid-cols-4 gap-10">
       <div className="md:col-span-2">
         <a href="#top" className="inline-block bg-background/95 rounded-2xl p-3">
-          <img src={logo} alt="Hanrose Atelier" className="h-16 w-auto object-contain" />
+          <img src={logo} alt="Hanrose Atelier" className="h-24 w-auto object-contain" />
         </a>
         <p className="mt-4 text-sm text-background/70 max-w-sm leading-relaxed">
           Quality & comfy for your little ones. Premium kidswear boutique —
