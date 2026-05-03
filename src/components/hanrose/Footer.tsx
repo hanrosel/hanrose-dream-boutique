@@ -1,20 +1,15 @@
 import { Instagram, MessageCircle, Mail, Heart } from "lucide-react";
-import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { WA_LINK } from "@/lib/hanrose";
+import logo from "@/assets/hanrose-logo.png";
 
 export const Footer = () => (
   <footer className="bg-foreground text-background">
     <div className="container py-16 grid md:grid-cols-4 gap-10">
       <div className="md:col-span-2">
-        <div className="text-background">
-          <a href="#top" className="flex items-center gap-2">
-            <span className="h-10 w-10 rounded-full bg-gradient-pink-blue flex items-center justify-center">
-              <Heart className="h-4 w-4 text-white" strokeWidth={1.5} />
-            </span>
-            <span className="font-serif text-xl">Hanrose Atelier</span>
-          </a>
-        </div>
+        <a href="#top" className="inline-block bg-background/95 rounded-2xl p-3">
+          <img src={logo} alt="Hanrose Atelier" className="h-16 w-auto object-contain" />
+        </a>
         <p className="mt-4 text-sm text-background/70 max-w-sm leading-relaxed">
           Quality & comfy for your little ones. Premium kidswear boutique —
           new arrivals & curated preloved gems.
