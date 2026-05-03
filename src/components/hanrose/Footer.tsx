@@ -1,9 +1,21 @@
-import { Instagram, MessageCircle, Mail, Heart } from "lucide-react";
+import { Instagram, MessageCircle, Mail, Heart, ShoppingBag, Music2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { WA_LINK } from "@/lib/hanrose";
+import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
 import logo from "@/assets/hanrose-logo.png";
 
-export const Footer = () => (
+export const Footer = () => {
+  const { data: s } = useSiteSettings();
+  const wa = buildWaLink(s);
+  const email = s?.email ?? "hello@hanrose.id";
+  const socials = [
+    { url: s?.instagram_url, icon: Instagram, label: "Instagram" },
+    { url: wa, icon: MessageCircle, label: "WhatsApp", external: true },
+    { url: s?.tiktok_url, icon: Music2, label: "TikTok" },
+    { url: s?.shopee_url, icon: ShoppingBag, label: "Shopee" },
+    { url: s?.tokopedia_url, icon: ShoppingBag, label: "Tokopedia" },
+    { url: `mailto:${email}`, icon: Mail, label: "Email" },
+  ].filter((x) => x.url);
+  return (
   <footer className="bg-foreground text-background">
     <div className="container py-16 grid md:grid-cols-4 gap-10">
       <div className="md:col-span-2">
@@ -15,15 +27,11 @@ export const Footer = () => (
           new arrivals & curated preloved gems.
         </p>
         <div className="mt-6 flex gap-3">
-          <a href="#" className="h-10 w-10 rounded-full bg-background/10 hover:bg-pink hover:text-foreground flex items-center justify-center transition-smooth">
-            <Instagram className="h-4 w-4" />
-          </a>
-          <a href={WA_LINK} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-full bg-background/10 hover:bg-pink hover:text-foreground flex items-center justify-center transition-smooth">
-            <MessageCircle className="h-4 w-4" />
-          </a>
-          <a href="mailto:hello@hanrose.id" className="h-10 w-10 rounded-full bg-background/10 hover:bg-pink hover:text-foreground flex items-center justify-center transition-smooth">
-            <Mail className="h-4 w-4" />
-          </a>
+          {socials.map((sc) => (
+            <a key={sc.label} href={sc.url as string} target="_blank" rel="noreferrer" aria-label={sc.label} className="h-10 w-10 rounded-full bg-background/10 hover:bg-pink hover:text-foreground flex items-center justify-center transition-smooth">
+              <sc.icon className="h-4 w-4" />
+            </a>
+          ))}
         </div>
       </div>
       <div>
@@ -42,7 +50,7 @@ export const Footer = () => (
           <li><a href="#faq" className="hover:text-pink transition-smooth">FAQ</a></li>
         </ul>
         <Button asChild variant="hanrose" size="sm" className="mt-5">
-          <a href={WA_LINK} target="_blank" rel="noreferrer">
+          <a href={wa} target="_blank" rel="noreferrer">
             <MessageCircle className="h-4 w-4" /> WhatsApp
           </a>
         </Button>
@@ -56,3 +64,4 @@ export const Footer = () => (
     </div>
   </footer>
 );
+};

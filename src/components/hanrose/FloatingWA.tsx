@@ -1,9 +1,11 @@
 import { MessageCircle } from "lucide-react";
-import { WA_LINK } from "@/lib/hanrose";
+import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
 
-export const FloatingWA = () => (
+export const FloatingWA = () => {
+  const { data } = useSiteSettings();
+  return (
   <a
-    href={WA_LINK}
+    href={buildWaLink(data)}
     target="_blank"
     rel="noreferrer"
     aria-label="Chat WhatsApp"
@@ -12,3 +14,4 @@ export const FloatingWA = () => (
     <MessageCircle className="h-6 w-6" />
   </a>
 );
+};

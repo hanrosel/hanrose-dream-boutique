@@ -1,34 +1,50 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { MessageCircle, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Placeholder } from "./Placeholder";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { waLink } from "@/lib/hanrose";
+import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
 
 type Product = {
+  id: string;
   name: string;
-  price: string;
-  badge: "New" | "Limited" | "Preloved Like New";
-  variant: "pink" | "blue" | "mixed" | "cream";
+  description: string | null;
+  price: number | null;
+  badge: string | null;
+  status: string;
+  images: string[];
 };
 
-const products: Product[] = [
-  { name: "Rosie Tulle Dress", price: "Rp —", badge: "New", variant: "pink" },
-  { name: "Hugo Linen Set", price: "Rp —", badge: "New", variant: "blue" },
-  { name: "Daisy Knit Cardigan", price: "Rp —", badge: "Limited", variant: "cream" },
-  { name: "Petit Bow Blouse", price: "Rp —", badge: "Preloved Like New", variant: "pink" },
-  { name: "Cloud Pajama Set", price: "Rp —", badge: "New", variant: "blue" },
-  { name: "Belle Occasion Gown", price: "Rp —", badge: "Limited", variant: "mixed" },
-];
-
-const badgeStyle: Record<Product["badge"], string> = {
-  New: "bg-pink text-primary-foreground",
-  Limited: "bg-foreground text-background",
-  "Preloved Like New": "bg-blue text-secondary-foreground",
+const variantFromStatus = (s: string): "pink" | "blue" | "mixed" | "cream" => {
+  if (s === "limited") return "mixed";
+  if (s === "preloved") return "cream";
+  return "pink";
+};
+const badgeClass = (b: string | null) => {
+  const x = (b ?? "").toLowerCase();
+  if (x.includes("limited")) return "bg-foreground text-background";
+  if (x.includes("preloved")) return "bg-blue text-secondary-foreground";
+  return "bg-pink text-primary-foreground";
 };
 
 export const Products = () => {
   const [active, setActive] = useState<Product | null>(null);
+  const { data: settings } = useSiteSettings();
+  const { data: products = [] } = useQuery({
+    queryKey: ["home_products"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,name,description,price,badge,status,images")
+        .eq("featured", true)
+        .order("sort_order")
+        .limit(12);
+      if (error) throw error;
+      return data as Product[];
+    },
+  });
 
   return (
     <section id="new" className="container py-20 md:py-28">
@@ -47,25 +63,26 @@ export const Products = () => {
       <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((p, i) => (
           <article
-            key={p.name}
+            key={p.id}
             className="group bg-white rounded-3xl overflow-hidden shadow-card hover:shadow-elegant transition-smooth animate-fade-up"
             style={{ animationDelay: `${i * 0.05}s` }}
           >
             <div className="relative">
-              <Placeholder
-                label={`Foto Produk — ${p.name}`}
-                variant={p.variant}
-                icon="sparkles"
-                className="aspect-square"
-              />
-              <span className={`absolute top-4 left-4 rounded-full px-3 py-1 text-[0.65rem] tracking-wider uppercase ${badgeStyle[p.badge]}`}>
-                {p.badge}
-              </span>
+              {p.images?.[0] ? (
+                <img src={p.images[0]} alt={p.name} loading="lazy" className="aspect-square w-full object-cover" />
+              ) : (
+                <Placeholder label={`Foto — ${p.name}`} variant={variantFromStatus(p.status)} icon="sparkles" className="aspect-square" />
+              )}
+              {p.badge && (
+                <span className={`absolute top-4 left-4 rounded-full px-3 py-1 text-[0.65rem] tracking-wider uppercase ${badgeClass(p.badge)}`}>
+                  {p.badge}
+                </span>
+              )}
             </div>
             <div className="p-5">
               <h3 className="font-serif text-xl">{p.name}</h3>
               <div className="mt-1 flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{p.price}</span>
+                <span className="text-sm text-muted-foreground">{p.price ? `Rp ${p.price.toLocaleString("id-ID")}` : "Rp —"}</span>
                 <Sparkles className="h-3 w-3 text-pink" />
               </div>
               <Button
@@ -85,12 +102,11 @@ export const Products = () => {
         <DialogContent className="max-w-lg rounded-3xl p-0 overflow-hidden border-0">
           {active && (
             <div>
-              <Placeholder
-                label={`Foto Produk — ${active.name}`}
-                variant={active.variant}
-                icon="crown"
-                className="aspect-square rounded-none"
-              />
+              {active.images?.[0] ? (
+                <img src={active.images[0]} alt={active.name} className="aspect-square w-full object-cover" />
+              ) : (
+                <Placeholder label={`Foto — ${active.name}`} variant={variantFromStatus(active.status)} icon="crown" className="aspect-square rounded-none" />
+              )}
               <button
                 onClick={() => setActive(null)}
                 className="absolute top-4 right-4 h-9 w-9 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-soft"
@@ -98,15 +114,15 @@ export const Products = () => {
                 <X className="h-4 w-4" />
               </button>
               <div className="p-6">
-                <span className={`inline-block rounded-full px-3 py-1 text-[0.65rem] tracking-wider uppercase ${badgeStyle[active.badge]}`}>
-                  {active.badge}
-                </span>
+                {active.badge && (
+                  <span className={`inline-block rounded-full px-3 py-1 text-[0.65rem] tracking-wider uppercase ${badgeClass(active.badge)}`}>
+                    {active.badge}
+                  </span>
+                )}
                 <h3 className="mt-3 font-serif text-3xl">{active.name}</h3>
-                <p className="mt-1 text-muted-foreground">{active.price}</p>
+                <p className="mt-1 text-muted-foreground">{active.price ? `Rp ${active.price.toLocaleString("id-ID")}` : "Rp —"}</p>
                 <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-                  Premium quality, lembut di kulit, dan dijahit dengan rapi.
-                  Cocok untuk daily wear maupun moment spesial. Tersedia size
-                  terbatas — chat kami untuk konfirmasi ketersediaan dan detail kondisi.
+                  {active.description ?? "Premium quality, lembut di kulit, dan dijahit dengan rapi."}
                 </p>
                 <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
                   <div className="rounded-2xl bg-pink-soft p-3">
@@ -119,7 +135,7 @@ export const Products = () => {
                   </div>
                 </div>
                 <Button asChild variant="whatsapp" className="mt-6 w-full" size="lg">
-                  <a href={waLink(active.name)} target="_blank" rel="noreferrer">
+                  <a href={buildWaLink(settings, active.name)} target="_blank" rel="noreferrer">
                     <MessageCircle className="h-4 w-4" /> Order via WhatsApp
                   </a>
                 </Button>
