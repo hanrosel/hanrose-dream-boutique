@@ -1,4 +1,5 @@
 import { Crown, Sparkles, Heart } from "lucide-react";
+import logo from "@/assets/hanrose-logo.png";
 
 const icons = { crown: Crown, sparkles: Sparkles, heart: Heart };
 
@@ -30,10 +31,15 @@ export const Placeholder = ({
         backgroundImage:
           "radial-gradient(circle at 20% 20%, white 0%, transparent 40%), radial-gradient(circle at 80% 70%, white 0%, transparent 40%)",
       }} />
-      <Icon className="h-8 w-8 text-pink/70 mb-3 animate-sparkle" strokeWidth={1.2} />
-      <span className="font-serif text-sm tracking-wider text-foreground/60 italic px-4 text-center">
+      <img
+        src={logo}
+        alt="Hanrose Atelier"
+        className="relative w-2/3 max-w-[260px] object-contain drop-shadow-sm"
+      />
+      <span className="relative mt-2 font-serif text-xs tracking-[0.2em] uppercase text-foreground/50 italic px-4 text-center">
         {label}
       </span>
+      <Icon className="hidden" />
     </div>
   );
 };
