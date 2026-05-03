@@ -15,12 +15,19 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        hanrose:
+          "bg-gradient-pink-blue text-white shadow-soft hover:shadow-elegant hover:-translate-y-0.5 transition-smooth rounded-full",
+        hanroseOutline:
+          "border border-pink/60 bg-white/60 backdrop-blur text-foreground hover:bg-pink-soft hover:border-pink rounded-full transition-smooth",
+        whatsapp:
+          "bg-[hsl(142_70%_45%)] text-white hover:bg-[hsl(142_70%_40%)] rounded-full shadow-soft transition-smooth",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
+        xl: "h-14 px-10 text-base",
       },
     },
     defaultVariants: {
