@@ -3,13 +3,14 @@ import { Menu, X, MessageCircle } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const links = [
-  { href: "#new", label: "New Arrivals" },
-  { href: "#collections", label: "Collections" },
-  { href: "#about", label: "About" },
-  { href: "#reviews", label: "Reviews" },
-  { href: "#faq", label: "FAQ" },
+  { hash: "new",         label: "New Arrivals" },
+  { hash: "collections", label: "Collections" },
+  { hash: "about",       label: "About" },
+  { hash: "reviews",     label: "Reviews" },
+  { hash: "faq",         label: "FAQ" },
 ];
 
 export const Navbar = () => {
@@ -17,6 +18,9 @@ export const Navbar = () => {
   const [open, setOpen] = useState(false);
   const { data: settings } = useSiteSettings();
   const wa = buildWaLink(settings);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isHome = location.pathname === "/";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -24,6 +28,15 @@ export const Navbar = () => {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const handleNavClick = (hash: string) => {
+    setOpen(false);
+    if (isHome) {
+      document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate(`/#${hash}`);
+    }
+  };
 
   return (
     <header
@@ -35,13 +48,13 @@ export const Navbar = () => {
         <Logo />
         <ul className="hidden md:flex items-center gap-8">
           {links.map((l) => (
-            <li key={l.href}>
-              <a
-                href={l.href}
-                className="text-sm tracking-wide text-foreground/80 hover:text-pink transition-smooth"
+            <li key={l.hash}>
+              <button
+                onClick={() => handleNavClick(l.hash)}
+                className="text-sm tracking-wide text-foreground/80 hover:text-pink transition-smooth bg-transparent border-0 cursor-pointer"
               >
                 {l.label}
-              </a>
+              </button>
             </li>
           ))}
         </ul>
@@ -64,14 +77,13 @@ export const Navbar = () => {
         <div className="md:hidden bg-background/95 backdrop-blur-md border-t border-border">
           <ul className="container py-4 flex flex-col gap-4">
             {links.map((l) => (
-              <li key={l.href}>
-                <a
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="block py-2 text-foreground/80"
+              <li key={l.hash}>
+                <button
+                  onClick={() => handleNavClick(l.hash)}
+                  className="block w-full text-left py-2 text-foreground/80 bg-transparent border-0 cursor-pointer"
                 >
                   {l.label}
-                </a>
+                </button>
               </li>
             ))}
             <li>
