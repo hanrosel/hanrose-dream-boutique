@@ -1,42 +1,28 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import { Plus, Pencil, Trash2, Download, Upload, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 
 type P = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  price: number | null;
-  stock: number;
-  badge: string | null;
-  status: string;
-  category_id: string | null;
-  images: string[];
-  featured: boolean;
-  sort_order: number;
+  id: string; name: string; slug: string; description: string | null;
+  price: number | null; stock: number; badge: string | null; status: string;
+  category_id: string | null; images: string[]; featured: boolean; sort_order: number;
 };
 type Cat = { id: string; name: string };
 
@@ -46,9 +32,12 @@ const empty = {
   badge: "New", status: "new", category_id: null as string | null,
   images: [] as string[], featured: true, sort_order: 0,
 };
+const PAGE_SIZE = 20;
 
 export default function AdminProducts() {
   const qc = useQueryClient();
+  const importRef = useRef<HTMLInputElement>(null);
+
   const { data: products = [] } = useQuery({
     queryKey: ["admin_products"],
     queryFn: async () => {
@@ -68,6 +57,24 @@ export default function AdminProducts() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<P | null>(null);
   const [form, setForm] = useState(empty);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [catFilter, setCatFilter] = useState("all");
+  const [page, setPage] = useState(1);
+
+  // Filtering
+  const filtered = products.filter((p) => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.slug.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter === "all" || p.status === statusFilter;
+    const matchCat = catFilter === "all" || p.category_id === catFilter;
+    return matchSearch && matchStatus && matchCat;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const resetPage = () => setPage(1);
 
   const start = (p?: P) => {
     if (p) {
@@ -103,40 +110,165 @@ export default function AdminProducts() {
     qc.invalidateQueries({ queryKey: ["admin_products"] });
   };
 
+  // Export JSON
+  const exportJSON = () => {
+    const blob = new Blob([JSON.stringify(products, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "products.json"; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Export CSV
+  const exportCSV = () => {
+    const cols = ["id","name","slug","description","price","stock","badge","status","category_id","featured","sort_order","images"];
+    const rows = products.map((p) =>
+      cols.map((c) => {
+        const v = (p as Record<string, unknown>)[c];
+        const str = Array.isArray(v) ? v.join("|") : String(v ?? "");
+        return `"${str.replace(/"/g, '""')}"`;
+      }).join(",")
+    );
+    const csv = [cols.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "products.csv"; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Import JSON
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      try {
+        const json = JSON.parse(ev.target?.result as string);
+        const rows = (Array.isArray(json) ? json : [json]).map(
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ({ id: _id, created_at: _c, updated_at: _u, ...rest }: Record<string, unknown>) => rest
+        ) as P[];
+        const { error } = await supabase.from("products").upsert(rows, { onConflict: "slug" });
+        if (error) return toast.error(error.message);
+        toast.success(`${rows.length} produk diimport`);
+        qc.invalidateQueries({ queryKey: ["admin_products"] });
+      } catch {
+        toast.error("File tidak valid");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-serif text-3xl">Products</h1>
-        <Button variant="hanrose" onClick={() => start()}><Plus className="h-4 w-4" /> Add Product</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={exportCSV}><Download className="h-4 w-4 mr-1" />CSV</Button>
+          <Button variant="outline" size="sm" onClick={exportJSON}><Download className="h-4 w-4 mr-1" />JSON</Button>
+          <Button variant="outline" size="sm" onClick={() => importRef.current?.click()}>
+            <Upload className="h-4 w-4 mr-1" />Import JSON
+          </Button>
+          <input ref={importRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+          <Button variant="hanrose" size="sm" onClick={() => start()}><Plus className="h-4 w-4 mr-1" />Add</Button>
+        </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {products.map((p) => (
-          <Card key={p.id} className="overflow-hidden rounded-2xl">
-            <div className="aspect-square bg-muted relative">
-              {p.images?.[0] ? (
-                <img src={p.images[0]} alt={p.name} className="h-full w-full object-cover" loading="lazy" />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">No image</div>
-              )}
-              {p.badge && <span className="absolute top-2 left-2 bg-pink text-primary-foreground rounded-full px-2 py-0.5 text-[0.65rem]">{p.badge}</span>}
-            </div>
-            <div className="p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div>
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3 mb-4">
+        <Input
+          placeholder="Cari nama / slug..."
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); resetPage(); }}
+          className="w-56"
+        />
+        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); resetPage(); }}>
+          <SelectTrigger className="w-36"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua status</SelectItem>
+            <SelectItem value="new">New</SelectItem>
+            <SelectItem value="limited">Limited</SelectItem>
+            <SelectItem value="preloved">Preloved</SelectItem>
+            <SelectItem value="sold">Sold out</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={catFilter} onValueChange={(v) => { setCatFilter(v); resetPage(); }}>
+          <SelectTrigger className="w-40"><SelectValue placeholder="Kategori" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua kategori</SelectItem>
+            {cats.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <span className="text-sm text-muted-foreground self-center">{filtered.length} produk</span>
+      </div>
+
+      {/* Table */}
+      <div className="rounded-xl border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12"></TableHead>
+              <TableHead>Nama</TableHead>
+              <TableHead>Kategori</TableHead>
+              <TableHead>Harga</TableHead>
+              <TableHead>Stock</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Featured</TableHead>
+              <TableHead className="w-20"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginated.length === 0 && (
+              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-10">Tidak ada produk</TableCell></TableRow>
+            )}
+            {paginated.map((p) => (
+              <TableRow key={p.id}>
+                <TableCell>
+                  {p.images?.[0]
+                    ? <img src={p.images[0]} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                    : <div className="h-10 w-10 rounded-lg bg-muted" />}
+                </TableCell>
+                <TableCell>
                   <div className="font-medium">{p.name}</div>
-                  <div className="text-xs text-muted-foreground">Stock: {p.stock} · Rp {p.price?.toLocaleString("id-ID") ?? "—"}</div>
-                </div>
-                <div className="flex gap-1">
-                  <Button size="sm" variant="outline" onClick={() => start(p)}><Pencil className="h-3 w-3" /></Button>
-                  <Button size="sm" variant="outline" onClick={() => del(p.id)}><Trash2 className="h-3 w-3" /></Button>
-                </div>
-              </div>
-            </div>
-          </Card>
-        ))}
+                  <div className="text-xs text-muted-foreground">{p.slug}</div>
+                </TableCell>
+                <TableCell className="text-sm">{cats.find((c) => c.id === p.category_id)?.name ?? "—"}</TableCell>
+                <TableCell className="text-sm">Rp {p.price?.toLocaleString("id-ID") ?? "—"}</TableCell>
+                <TableCell className="text-sm">{p.stock}</TableCell>
+                <TableCell>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-muted capitalize">{p.status}</span>
+                </TableCell>
+                <TableCell className="text-sm">{p.featured ? "✓" : "—"}</TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="outline" onClick={() => start(p)}><Pencil className="h-3 w-3" /></Button>
+                    <Button size="sm" variant="outline" onClick={() => del(p.id)}><Trash2 className="h-3 w-3" /></Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
 
+      {/* Pagination */}
+      <div className="flex items-center justify-between mt-4">
+        <span className="text-sm text-muted-foreground">
+          Halaman {page} dari {totalPages}
+        </span>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Edit/Add Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
           <DialogHeader><DialogTitle>{editing ? "Edit" : "New"} Product</DialogTitle></DialogHeader>
@@ -183,7 +315,10 @@ export default function AdminProducts() {
                 </Select>
               </div>
             </div>
-            <div className="flex items-center gap-2"><Switch checked={form.featured} onCheckedChange={(v) => setForm({ ...form, featured: v })} /><Label>Featured (tampil di New Arrivals)</Label></div>
+            <div className="flex items-center gap-2">
+              <Switch checked={form.featured} onCheckedChange={(v) => setForm({ ...form, featured: v })} />
+              <Label>Featured (tampil di New Arrivals)</Label>
+            </div>
             <Button variant="hanrose" onClick={save} className="w-full">Save</Button>
           </div>
         </DialogContent>

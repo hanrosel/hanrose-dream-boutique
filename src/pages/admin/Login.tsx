@@ -22,10 +22,11 @@ export default function AdminLogin() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    const { error } = await signIn(email, password);
+    const { error, isAdmin: admin } = await signIn(email, password);
     setBusy(false);
     if (error) toast.error(error);
-    else toast.success("Welcome back!");
+    else if (admin) nav("/admin", { replace: true });
+    else toast.error("Akun ini bukan admin.");
   };
 
   return (
