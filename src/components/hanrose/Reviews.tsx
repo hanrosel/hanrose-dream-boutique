@@ -1,15 +1,25 @@
-import { Check, CheckCheck } from "lucide-react";
+import { CheckCheck } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-const reviews = [
-  { name: "Mama R.", time: "10:24", text: "Bahannya lembut bangettt 😍 anak suka banget pake dressnya, ga gerah!", read: true },
-  { name: "Mama D.", time: "14:02", text: "Packagingnya cantik & rapi, kayak buka kado. Worth every rupiah ✨", read: true },
-  { name: "Mama A.", time: "09:11", text: "Preloved yang aku beli kondisinya beneran kayak baru. Recommended!", read: true },
-  { name: "Mama S.", time: "21:48", text: "Anak aku pake buat birthday photoshoot, hasilnya cakep banget 🎀", read: true },
-  { name: "Mama K.", time: "16:33", text: "Ownernya helpful, fast respond, sizing rekomendasi pas banget.", read: true },
-  { name: "Mama Y.", time: "11:07", text: "Detailnya premium, jahitannya rapi. Bakal repeat order pasti! 🤍", read: true },
-];
+type R = { id: string; name: string; text: string };
 
-export const Reviews = () => (
+export const Reviews = () => {
+  const { data: reviews = [] } = useQuery({
+    queryKey: ["home_reviews"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("id,name,text")
+        .eq("approved", true)
+        .order("sort_order")
+        .limit(9);
+      if (error) throw error;
+      return data as R[];
+    },
+  });
+
+  return (
   <section id="reviews" className="bg-gradient-soft py-20 md:py-28">
     <div className="container">
       <div className="text-center max-w-xl mx-auto">
@@ -21,21 +31,16 @@ export const Reviews = () => (
       <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
         {reviews.map((r, i) => (
           <div
-            key={i}
+            key={r.id}
             className="relative bg-white rounded-3xl rounded-tl-md p-5 shadow-card animate-fade-up"
             style={{ animationDelay: `${i * 0.05}s` }}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-pink">{r.name}</span>
-              <span className="text-[0.65rem] text-muted-foreground">{r.time}</span>
             </div>
             <p className="text-sm text-foreground/80 leading-relaxed">{r.text}</p>
             <div className="mt-2 flex justify-end">
-              {r.read ? (
-                <CheckCheck className="h-3.5 w-3.5 text-blue" />
-              ) : (
-                <Check className="h-3.5 w-3.5 text-muted-foreground" />
-              )}
+              <CheckCheck className="h-3.5 w-3.5 text-blue" />
             </div>
           </div>
         ))}
@@ -43,3 +48,4 @@ export const Reviews = () => (
     </div>
   </section>
 );
+};

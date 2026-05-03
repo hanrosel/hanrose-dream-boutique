@@ -1,9 +1,12 @@
 import { Sparkles, MessageCircle, ArrowRight, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Placeholder } from "./Placeholder";
-import { WA_LINK } from "@/lib/hanrose";
+import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
 
-export const Hero = () => (
+export const Hero = () => {
+  const { data: s } = useSiteSettings();
+  const wa = buildWaLink(s);
+  return (
   <section id="top" className="relative overflow-hidden bg-gradient-hero pt-32 pb-20 md:pt-40 md:pb-28">
     <Sparkles className="absolute top-32 left-10 h-5 w-5 text-pink/60 animate-sparkle" />
     <Sparkles className="absolute top-48 right-16 h-4 w-4 text-blue animate-sparkle" style={{ animationDelay: "1s" }} />
@@ -30,7 +33,7 @@ export const Hero = () => (
             </a>
           </Button>
           <Button asChild variant="hanroseOutline" size="xl">
-            <a href={WA_LINK} target="_blank" rel="noreferrer">
+            <a href={wa} target="_blank" rel="noreferrer">
               <MessageCircle className="h-4 w-4" /> Chat via WhatsApp
             </a>
           </Button>
@@ -70,3 +73,4 @@ export const Hero = () => (
     </div>
   </section>
 );
+};

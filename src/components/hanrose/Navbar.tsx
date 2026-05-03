@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Menu, X, MessageCircle } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
-import { WA_LINK } from "@/lib/hanrose";
+import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
 
 const links = [
   { href: "#new", label: "New Arrivals" },
@@ -15,6 +15,8 @@ const links = [
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const { data: settings } = useSiteSettings();
+  const wa = buildWaLink(settings);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -45,7 +47,7 @@ export const Navbar = () => {
         </ul>
         <div className="hidden md:block">
           <Button asChild variant="hanrose" size="sm">
-            <a href={WA_LINK} target="_blank" rel="noreferrer">
+            <a href={wa} target="_blank" rel="noreferrer">
               <MessageCircle className="h-4 w-4" /> WhatsApp
             </a>
           </Button>
@@ -74,7 +76,7 @@ export const Navbar = () => {
             ))}
             <li>
               <Button asChild variant="hanrose" className="w-full">
-                <a href={WA_LINK} target="_blank" rel="noreferrer">
+                <a href={wa} target="_blank" rel="noreferrer">
                   <MessageCircle className="h-4 w-4" /> Chat WhatsApp
                 </a>
               </Button>
