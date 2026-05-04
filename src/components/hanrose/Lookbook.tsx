@@ -2,6 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SimpleSlider } from "./SimpleSlider";
 import { Placeholder } from "./Placeholder";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { ShoppingBag } from "lucide-react";
 
 const VARIANTS = ["pink", "blue", "mixed", "cream"] as const;
 
@@ -56,6 +59,13 @@ export const Lookbook = () => {
               )}
             </div>
           ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Button asChild variant="hanrose" size="lg">
+            <Link to="/collections">
+              <ShoppingBag className="h-4 w-4" /> Belanja dari Lookbook
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

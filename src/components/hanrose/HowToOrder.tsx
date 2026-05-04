@@ -1,8 +1,12 @@
+import { ShoppingBag } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+
 const steps = [
-  { n: "01", t: "Pilih Item", d: "Browse koleksi atau lookbook, simpan favoritmu." },
-  { n: "02", t: "Chat WhatsApp", d: "Tanyakan detail, ketersediaan, dan rekomendasi size." },
-  { n: "03", t: "Konfirmasi", d: "Konfirmasi ukuran, kondisi (untuk preloved), dan total." },
-  { n: "04", t: "Pembayaran", d: "Transfer ke rekening Hanrose Atelier." },
+  { n: "01", t: "Belanja Koleksi", d: "Buka halaman koleksi, pilih item, lalu add to cart." },
+  { n: "02", t: "Checkout", d: "Isi nama, WhatsApp, alamat, dan catatan size tanpa login." },
+  { n: "03", t: "Konfirmasi Admin", d: "Kami cek stok, ukuran, ongkir, dan total lewat WhatsApp." },
+  { n: "04", t: "Transfer", d: "Transfer setelah stok dan total dikonfirmasi admin." },
   { n: "05", t: "Packing & Kirim", d: "Dipacking cantik & dikirim hari berikutnya." },
 ];
 
@@ -30,5 +34,12 @@ export const HowToOrder = () => (
         </li>
       ))}
     </ol>
+    <div className="mt-10 text-center">
+      <Button asChild variant="hanrose" size="lg">
+        <Link to="/collections">
+          <ShoppingBag className="h-4 w-4" /> Mulai Belanja
+        </Link>
+      </Button>
+    </div>
   </section>
 );
