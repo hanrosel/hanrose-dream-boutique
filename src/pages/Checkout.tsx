@@ -24,6 +24,14 @@ type CheckoutForm = {
   notes: string;
 };
 
+type PendingHold = {
+  orderId: string;
+  orderCode: string;
+  total: number;
+  expiresAt: string;
+  waLink: string;
+};
+
 const initialForm: CheckoutForm = {
   customer_name: "",
   whatsapp: "",
@@ -44,13 +52,22 @@ const generateOrderCode = () => {
   return `HR-${y}${m}${d}-${random}`;
 };
 
+const HOLD_KEY = "hanrose_pending_order";
+
 export default function CheckoutPage() {
   const cart = useCart();
   const navigate = useNavigate();
   const { data: settings } = useSiteSettings();
   const [form, setForm] = useState(initialForm);
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState<{ orderCode: string; total: number; waLink: string } | null>(null);
+  const [done, setDone] = useState<PendingHold | null>(() => {
+    try {
+      const raw = localStorage.getItem(HOLD_KEY);
+      return raw ? (JSON.parse(raw) as PendingHold) : null;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     setSeo({
@@ -110,6 +127,7 @@ export default function CheckoutPage() {
 
     const orderId = crypto.randomUUID();
     const orderCode = generateOrderCode();
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
 
     const { error: orderError } = await supabase.from("orders").insert({
       id: orderId,
@@ -125,6 +143,7 @@ export default function CheckoutPage() {
       total,
       status: "pending_payment",
       payment_method: "bank_transfer",
+      expires_at: expiresAt,
     } as never);
 
     if (orderError) {
@@ -147,7 +166,7 @@ export default function CheckoutPage() {
 
     setBusy(false);
     if (itemsError) {
-      await supabase.from("orders").delete().eq("id", orderId);
+      await supabase.rpc("cancel_order_hold", { _order_id: orderId, _order_code: orderCode });
       return toast.error(itemsError.message);
     }
 
@@ -169,7 +188,24 @@ export default function CheckoutPage() {
     );
 
     cart.clearCart();
-    setDone({ orderCode, total, waLink });
+    const hold = { orderId, orderCode, total, expiresAt, waLink };
+    localStorage.setItem(HOLD_KEY, JSON.stringify(hold));
+    setDone(hold);
+  };
+
+  const cancelHold = async () => {
+    if (!done) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc("cancel_order_hold", {
+      _order_id: done.orderId,
+      _order_code: done.orderCode,
+    });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    if (!data) return toast.error("Order sudah tidak bisa dibatalkan dari halaman ini.");
+    localStorage.removeItem(HOLD_KEY);
+    setDone(null);
+    toast.success("Order dibatalkan dan stock dikembalikan.");
   };
 
   if (done) {
@@ -184,6 +220,10 @@ export default function CheckoutPage() {
               Kode order kamu <span className="font-medium text-foreground">{done.orderCode}</span>.
               Admin akan konfirmasi stok, ongkir, dan rekening transfer sebelum order diproses.
             </p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Stock di-hold sampai {new Intl.DateTimeFormat("id-ID", { timeStyle: "short", dateStyle: "medium" }).format(new Date(done.expiresAt))}.
+              Kalau belum jadi order, kamu bisa batalkan supaya stock kembali.
+            </p>
             <div className="mt-6 rounded-2xl bg-pink-soft p-4">
               <div className="text-xs uppercase tracking-wider text-pink">Total sementara</div>
               <div className="mt-1 font-serif text-3xl">{formatPrice(done.total)}</div>
@@ -195,6 +235,9 @@ export default function CheckoutPage() {
             </Button>
             <Button asChild variant="hanroseOutline" className="mt-3 w-full">
               <Link to="/collections">Lanjut lihat koleksi</Link>
+            </Button>
+            <Button variant="outline" className="mt-3 w-full" onClick={cancelHold} disabled={busy}>
+              Batal & kosongkan checkout
             </Button>
           </Card>
         </main>
