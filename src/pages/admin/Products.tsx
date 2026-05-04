@@ -19,6 +19,7 @@ import { ImageUpload } from "@/components/admin/ImageUpload";
 type P = {
   id: string; name: string; slug: string; description: string | null;
   price: number | null; stock: number; badge: string | null; status: string;
+  sizes: string[];
   category_id: string | null; images: string[]; featured: boolean; sort_order: number;
   show_in_hero: boolean; show_in_collection: boolean; show_in_lookbook: boolean;
   link_url: string | null;
@@ -27,13 +28,18 @@ type Cat = { id: string; name: string };
 
 const slugify = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const empty = {
-  name: "", slug: "", description: "", price: 0, stock: 0,
+  name: "", slug: "", description: "", price: "", stock: "",
+  sizes: [] as string[],
   badge: "New", status: "new", category_id: null as string | null,
-  images: [] as string[], featured: true, sort_order: 0,
+  images: [] as string[], featured: true, sort_order: "",
   show_in_hero: false, show_in_collection: false, show_in_lookbook: false,
   link_url: "",
 };
 const PAGE_SIZE = 20;
+const toNumberOrNull = (value: string | number | null | undefined) =>
+  value === "" || value == null ? null : Number(value);
+const toNumberOrZero = (value: string | number | null | undefined) =>
+  value === "" || value == null ? 0 : Number(value);
 
 export default function AdminProducts() {
   const qc = useQueryClient();
@@ -85,9 +91,13 @@ export default function AdminProducts() {
       setEditing(p);
       setForm({
         name: p.name, slug: p.slug, description: p.description ?? "",
-        price: p.price ?? 0, stock: p.stock, badge: p.badge ?? "",
+        price: p.price == null ? "" : String(p.price),
+        stock: String(p.stock),
+        badge: p.badge ?? "",
+        sizes: p.sizes ?? [],
         status: p.status, category_id: p.category_id, images: p.images ?? [],
-        featured: p.featured, sort_order: p.sort_order,
+        featured: p.featured,
+        sort_order: String(p.sort_order),
         show_in_hero: p.show_in_hero ?? false,
         show_in_collection: p.show_in_collection ?? false,
         show_in_lookbook: p.show_in_lookbook ?? false,
@@ -101,10 +111,15 @@ export default function AdminProducts() {
   };
 
   const save = async () => {
+    const stock = toNumberOrZero(form.stock);
     const payload = {
       ...form,
       slug: form.slug || slugify(form.name),
+      price: toNumberOrNull(form.price),
+      stock,
+      sort_order: toNumberOrZero(form.sort_order),
       link_url: form.link_url || null,
+      status: stock <= 0 ? "sold" : form.status,
     };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
@@ -125,7 +140,7 @@ export default function AdminProducts() {
   // All exportable columns (includes new homepage flags)
   const EXPORT_COLS = [
     "name","slug","description","price","stock","badge","status",
-    "category_id","images","featured","sort_order",
+    "sizes","category_id","images","featured","sort_order",
     "show_in_hero","show_in_collection","show_in_lookbook","link_url",
   ] as const;
 
@@ -160,7 +175,7 @@ export default function AdminProducts() {
   const downloadTemplate = () => {
     const example = [
       "Dress Bunga Pink","dress-bunga-pink","Dress cantik bahan katun lembut",
-      "150000","5","New","new","","","true","0",
+      "150000","5","New","new","1Y|2Y|3Y","","","true","0",
       "false","true","false","https://wa.me/6287887297885",
     ].join(",");
     const csv = [[...EXPORT_COLS].join(","), example].join("\n");
@@ -181,6 +196,11 @@ export default function AdminProducts() {
       ? rest.images
       : typeof rest.images === "string" && rest.images
         ? rest.images.split("|")
+        : [],
+    sizes: Array.isArray(rest.sizes)
+      ? rest.sizes
+      : typeof rest.sizes === "string" && rest.sizes
+        ? rest.sizes.split("|").map((size) => size.trim()).filter(Boolean)
         : [],
     // UUID fields — empty string must be null
     category_id: rest.category_id || null,
@@ -336,13 +356,14 @@ export default function AdminProducts() {
               <th className="p-1 text-left font-medium hidden sm:table-cell">Kat.</th>
               <th className="p-1 text-left font-medium">Harga</th>
               <th className="p-1 text-left font-medium hidden sm:table-cell">Stok</th>
+              <th className="p-1 text-left font-medium hidden md:table-cell">Size</th>
               <th className="p-1 text-left font-medium">Status</th>
               <th className="p-1 w-12"></th>
             </tr>
           </thead>
           <tbody>
             {paginated.length === 0 && (
-              <tr><td colSpan={7} className="text-center text-muted-foreground py-6 text-xs">Tidak ada produk</td></tr>
+              <tr><td colSpan={8} className="text-center text-muted-foreground py-6 text-xs">Tidak ada produk</td></tr>
             )}
             {paginated.map((p) => (
               <tr key={p.id} className="border-b last:border-0 hover:bg-muted/20">
@@ -367,6 +388,9 @@ export default function AdminProducts() {
                 </td>
                 {/* Stok */}
                 <td className="p-1 hidden sm:table-cell">{p.stock}</td>
+                <td className="p-1 hidden md:table-cell text-muted-foreground max-w-[90px] truncate">
+                  {p.sizes?.length ? p.sizes.join(", ") : "—"}
+                </td>
                 {/* Status */}
                 <td className="p-1">
                   <span className="px-1 py-0.5 rounded bg-muted capitalize">{p.status}</span>
@@ -416,9 +440,52 @@ export default function AdminProducts() {
             </div>
             <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label>Price (Rp)</Label><Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: +e.target.value })} /></div>
-              <div><Label>Stock</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: +e.target.value })} /></div>
-              <div><Label>Sort</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: +e.target.value })} /></div>
+              <div>
+                <Label>Price (Rp)</Label>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label>Stock</Label>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  value={form.stock}
+                  onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label>Sort</Label>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  value={form.sort_order}
+                  onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
+                  placeholder="0"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Available sizes</Label>
+              <Input
+                value={form.sizes.join(", ")}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    sizes: e.target.value.split(",").map((size) => size.trim()).filter(Boolean),
+                  })
+                }
+                placeholder="Contoh: 1Y, 2Y, 3Y, 4Y"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Pisahkan dengan koma. Customer hanya bisa checkout size yang tersedia di sini.
+              </p>
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>

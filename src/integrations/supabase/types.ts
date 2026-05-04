@@ -148,6 +148,7 @@ export type Database = {
           created_at: string
           customer_name: string
           email: string | null
+          expires_at: string
           id: string
           notes: string | null
           order_code: string
@@ -155,6 +156,7 @@ export type Database = {
           payment_proof: string | null
           shipping_fee: number
           status: string
+          stock_released: boolean
           subtotal: number
           total: number
           updated_at: string
@@ -167,6 +169,7 @@ export type Database = {
           created_at?: string
           customer_name: string
           email?: string | null
+          expires_at?: string
           id?: string
           notes?: string | null
           order_code: string
@@ -174,6 +177,7 @@ export type Database = {
           payment_proof?: string | null
           shipping_fee?: number
           status?: string
+          stock_released?: boolean
           subtotal?: number
           total?: number
           updated_at?: string
@@ -186,6 +190,7 @@ export type Database = {
           created_at?: string
           customer_name?: string
           email?: string | null
+          expires_at?: string
           id?: string
           notes?: string | null
           order_code?: string
@@ -193,6 +198,7 @@ export type Database = {
           payment_proof?: string | null
           shipping_fee?: number
           status?: string
+          stock_released?: boolean
           subtotal?: number
           total?: number
           updated_at?: string
@@ -215,6 +221,7 @@ export type Database = {
           show_in_collection: boolean
           show_in_hero: boolean
           show_in_lookbook: boolean
+          sizes: string[]
           slug: string
           sort_order: number
           status: string
@@ -235,6 +242,7 @@ export type Database = {
           show_in_collection?: boolean
           show_in_hero?: boolean
           show_in_lookbook?: boolean
+          sizes?: string[]
           slug: string
           sort_order?: number
           status?: string
@@ -255,6 +263,7 @@ export type Database = {
           show_in_collection?: boolean
           show_in_hero?: boolean
           show_in_lookbook?: boolean
+          sizes?: string[]
           slug?: string
           sort_order?: number
           status?: string
@@ -414,6 +423,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_order_hold: {
+        Args: {
+          _order_code: string
+          _order_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

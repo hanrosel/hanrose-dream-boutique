@@ -5,6 +5,7 @@ import { SimpleSlider } from "./SimpleSlider";
 import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 export const Hero = () => {
   const { data: s } = useSiteSettings();
@@ -52,11 +53,14 @@ export const Hero = () => {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild variant="hanrose" size="xl">
-              <a href="#new">Shop New Arrivals <ArrowRight className="h-4 w-4" /></a>
+              <Link to="/collections">Belanja Koleksi <ArrowRight className="h-4 w-4" /></Link>
             </Button>
             <Button asChild variant="hanroseOutline" size="xl">
+              <Link to="/collections">Lihat New Arrivals</Link>
+            </Button>
+            <Button asChild variant="ghost" size="xl" className="rounded-full text-foreground/70 hover:text-pink">
               <a href={wa} target="_blank" rel="noreferrer">
-                <MessageCircle className="h-4 w-4" /> Chat via WhatsApp
+                <MessageCircle className="h-4 w-4" /> Tanya Size
               </a>
             </Button>
           </div>

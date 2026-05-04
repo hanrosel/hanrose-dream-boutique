@@ -2,6 +2,9 @@ import { Sparkles } from "lucide-react";
 import { Placeholder } from "./Placeholder";
 import { SimpleSlider } from "./SimpleSlider";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { ShoppingBag } from "lucide-react";
 
 export const Story = () => {
   const { data: s } = useSiteSettings();
@@ -59,6 +62,11 @@ export const Story = () => {
               <div className="text-xs uppercase tracking-wider text-muted-foreground">Hand Curated</div>
             </div>
           </div>
+          <Button asChild variant="hanrose" size="lg" className="mt-8">
+            <Link to="/collections">
+              <ShoppingBag className="h-4 w-4" /> Belanja Koleksi Hanrose
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

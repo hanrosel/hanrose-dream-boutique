@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/useCart";
 
@@ -67,12 +68,30 @@ export const CartDrawer = () => {
                       </div>
 
                       <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
-                        <Input
-                          value={item.selectedSize}
-                          onChange={(e) => cart.updateItem(item.id, { selectedSize: e.target.value })}
-                          placeholder="Size"
-                          className="h-9 rounded-full"
-                        />
+                        {item.sizes?.length ? (
+                          <Select
+                            value={item.selectedSize}
+                            onValueChange={(selectedSize) => cart.updateItem(item.id, { selectedSize })}
+                          >
+                            <SelectTrigger className="h-9 rounded-full">
+                              <SelectValue placeholder="Size" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {item.sizes.map((size) => (
+                                <SelectItem key={size} value={size}>
+                                  {size}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input
+                            value={item.selectedSize}
+                            onChange={(e) => cart.updateItem(item.id, { selectedSize: e.target.value })}
+                            placeholder="Size"
+                            className="h-9 rounded-full"
+                          />
+                        )}
                         <div className="flex h-9 items-center rounded-full border bg-background">
                           <button
                             onClick={() => cart.updateItem(item.id, { quantity: item.quantity - 1 })}

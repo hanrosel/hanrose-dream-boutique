@@ -21,15 +21,18 @@ type Product = {
   badge: string | null;
   status: string;
   images: string[];
+  stock: number;
+  sizes: string[];
 };
 
 const PAGE_SIZE = 50;
 
 const badgeClass = (b: string | null) => {
   const x = (b ?? "").toLowerCase();
-  if (x.includes("limited")) return "bg-foreground text-background";
-  if (x.includes("preloved")) return "bg-blue text-secondary-foreground";
-  return "bg-pink text-primary-foreground";
+  if (x.includes("sold")) return "bg-foreground text-background border-white/70";
+  if (x.includes("limited")) return "bg-foreground text-background border-white/70";
+  if (x.includes("preloved")) return "bg-blue text-secondary-foreground border-white/70";
+  return "bg-white/95 text-foreground border-pink/40 shadow-soft";
 };
 
 const variantFromStatus = (s: string): "pink" | "blue" | "mixed" | "cream" => {
@@ -51,7 +54,7 @@ export default function CollectionsPage() {
       const to = from + PAGE_SIZE - 1;
       const { data, error, count } = await supabase
         .from("products")
-        .select("id,name,description,price,badge,status,images", { count: "exact" })
+        .select("id,name,description,price,badge,status,images,stock,sizes", { count: "exact" })
         .order("sort_order")
         .range(from, to);
       if (error) throw error;
@@ -62,6 +65,16 @@ export default function CollectionsPage() {
   const products = data?.products ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const toCartProduct = (p: Product) => ({
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    image: p.images?.[0],
+    sizes: p.sizes ?? [],
+    stock: p.stock,
+    status: p.status,
+  });
+  const isAvailable = (p: Product) => p.status !== "sold" && p.stock > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -105,9 +118,9 @@ export default function CollectionsPage() {
                       className="aspect-[3/4]"
                     />
                   )}
-                  {p.badge && (
-                    <span className={`absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[0.6rem] tracking-wider uppercase ${badgeClass(p.badge)}`}>
-                      {p.badge}
+                  {(p.badge || !isAvailable(p)) && (
+                    <span className={`absolute top-3 left-3 rounded-full border px-2.5 py-0.5 text-[0.6rem] tracking-wider uppercase ${badgeClass(!isAvailable(p) ? "sold" : p.badge)}`}>
+                      {!isAvailable(p) ? "Sold out" : p.badge}
                     </span>
                   )}
                 </div>
@@ -122,13 +135,14 @@ export default function CollectionsPage() {
                   <Button
                     onClick={(event) => {
                       event.stopPropagation();
-                      cart.addItem({ id: p.id, name: p.name, price: p.price, image: p.images?.[0] });
+                      cart.addItem(toCartProduct(p));
                     }}
                     variant="hanroseOutline"
                     size="sm"
                     className="mt-3 w-full"
+                    disabled={!isAvailable(p)}
                   >
-                    <ShoppingBag className="h-4 w-4" /> Add
+                    <ShoppingBag className="h-4 w-4" /> {isAvailable(p) ? "Add" : "Sold"}
                   </Button>
                 </div>
               </article>
@@ -179,9 +193,9 @@ export default function CollectionsPage() {
                 <X className="h-4 w-4" />
               </button>
               <div className="p-6">
-                {active.badge && (
-                  <span className={`inline-block rounded-full px-3 py-1 text-[0.65rem] tracking-wider uppercase ${badgeClass(active.badge)}`}>
-                    {active.badge}
+                {(active.badge || !isAvailable(active)) && (
+                  <span className={`inline-block rounded-full border px-3 py-1 text-[0.65rem] tracking-wider uppercase ${badgeClass(!isAvailable(active) ? "sold" : active.badge)}`}>
+                    {!isAvailable(active) ? "Sold out" : active.badge}
                   </span>
                 )}
                 <h3 className="mt-3 font-serif text-3xl">{active.name}</h3>
@@ -198,16 +212,19 @@ export default function CollectionsPage() {
                   </div>
                   <div className="rounded-2xl bg-blue-soft p-3">
                     <div className="uppercase tracking-wider text-blue">Size</div>
-                    <div className="mt-1 text-foreground/70">1 — 8 tahun</div>
+                    <div className="mt-1 text-foreground/70">
+                      {active.sizes?.length ? active.sizes.join(", ") : "Tanya admin"}
+                    </div>
                   </div>
                 </div>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   <Button
-                    onClick={() => cart.addItem({ id: active.id, name: active.name, price: active.price, image: active.images?.[0] })}
+                    onClick={() => cart.addItem(toCartProduct(active))}
                     variant="hanrose"
                     size="lg"
+                    disabled={!isAvailable(active)}
                   >
-                    <ShoppingBag className="h-4 w-4" /> Add to cart
+                    <ShoppingBag className="h-4 w-4" /> {isAvailable(active) ? "Add to cart" : "Sold out"}
                   </Button>
                   <Button asChild variant="whatsapp" size="lg">
                     <a href={buildWaLink(settings, active.name)} target="_blank" rel="noreferrer">

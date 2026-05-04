@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Menu, X, MessageCircle } from "lucide-react";
+import { Menu, X, MessageCircle, ShoppingBag } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
@@ -7,7 +7,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const links = [
   { hash: "new",         label: "New Arrivals" },
-  { hash: "collections", label: "Collections" },
   { hash: "about",       label: "About" },
   { hash: "reviews",     label: "Reviews" },
   { hash: "faq",         label: "FAQ" },
@@ -66,7 +65,12 @@ export const Navbar = () => {
             </Link>
           </li>
         </ul>
-        <div className="hidden md:block">
+        <div className="hidden md:flex items-center gap-2">
+          <Button asChild variant="hanrose" size="sm">
+            <Link to="/collections">
+              <ShoppingBag className="h-4 w-4" /> Belanja
+            </Link>
+          </Button>
           <Button asChild variant="hanrose" size="sm">
             <a href={wa} target="_blank" rel="noreferrer">
               <MessageCircle className="h-4 w-4" /> WhatsApp
@@ -102,6 +106,13 @@ export const Navbar = () => {
               >
                 Blog
               </Link>
+            </li>
+            <li>
+              <Button asChild variant="hanrose" className="w-full">
+                <Link to="/collections" onClick={() => setOpen(false)}>
+                  <ShoppingBag className="h-4 w-4" /> Belanja Koleksi
+                </Link>
+              </Button>
             </li>
             <li>
               <Button asChild variant="hanrose" className="w-full">

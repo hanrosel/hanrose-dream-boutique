@@ -1,4 +1,4 @@
-import { ArrowUpRight, ArrowRight } from "lucide-react";
+import { ArrowUpRight, ArrowRight, ShoppingBag } from "lucide-react";
 import { Placeholder } from "./Placeholder";
 import { SimpleSlider } from "./SimpleSlider";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ export const Collections = () => {
           </h2>
         </div>
         <Button asChild variant="hanroseOutline" size="sm">
-          <Link to="/collections">Lihat Semua <ArrowRight className="h-4 w-4" /></Link>
+          <Link to="/collections">Belanja Semua <ArrowRight className="h-4 w-4" /></Link>
         </Button>
       </div>
 
@@ -63,12 +63,12 @@ export const Collections = () => {
                     <Placeholder label={p.name} variant={VARIANTS[i % 8]} icon={ICONS[i % 8]} className="aspect-[3/4]" />
                   </a>
                 )}
-                <a href={p.link_url ?? "#collections"} className="block p-5">
+                <Link to="/collections" className="block p-5">
                   <div className="flex items-center justify-between">
                     <h3 className="font-serif text-xl">{p.name}</h3>
                     <ArrowUpRight className="h-4 w-4 text-pink group-hover:rotate-12 transition-smooth" />
                   </div>
-                </a>
+                </Link>
               </div>
             ))
           : /* fallback placeholders */
@@ -88,7 +88,14 @@ export const Collections = () => {
       {hasMore && (
         <div className="mt-8 text-center">
           <Button asChild variant="hanrose">
-            <Link to="/collections">Lihat Semua Koleksi <ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/collections"><ShoppingBag className="h-4 w-4" /> Belanja Semua Koleksi</Link>
+          </Button>
+        </div>
+      )}
+      {!hasMore && (
+        <div className="mt-8 text-center">
+          <Button asChild variant="hanrose">
+            <Link to="/collections"><ShoppingBag className="h-4 w-4" /> Belanja Koleksi Lengkap</Link>
           </Button>
         </div>
       )}

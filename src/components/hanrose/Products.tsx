@@ -16,6 +16,8 @@ type Product = {
   badge: string | null;
   status: string;
   images: string[];
+  stock: number;
+  sizes: string[];
 };
 
 const variantFromStatus = (s: string): "pink" | "blue" | "mixed" | "cream" => {
@@ -25,9 +27,10 @@ const variantFromStatus = (s: string): "pink" | "blue" | "mixed" | "cream" => {
 };
 const badgeClass = (b: string | null) => {
   const x = (b ?? "").toLowerCase();
-  if (x.includes("limited")) return "bg-foreground text-background";
-  if (x.includes("preloved")) return "bg-blue text-secondary-foreground";
-  return "bg-pink text-primary-foreground";
+  if (x.includes("sold")) return "bg-foreground text-background border-white/70";
+  if (x.includes("limited")) return "bg-foreground text-background border-white/70";
+  if (x.includes("preloved")) return "bg-blue text-secondary-foreground border-white/70";
+  return "bg-white/95 text-foreground border-pink/40 shadow-soft";
 };
 
 export const Products = () => {
@@ -39,7 +42,7 @@ export const Products = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("id,name,description,price,badge,status,images")
+        .select("id,name,description,price,badge,status,images,stock,sizes")
         .eq("featured", true)
         .order("sort_order")
         .limit(12);
@@ -47,6 +50,17 @@ export const Products = () => {
       return data as Product[];
     },
   });
+
+  const toCartProduct = (p: Product) => ({
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    image: p.images?.[0],
+    sizes: p.sizes ?? [],
+    stock: p.stock,
+    status: p.status,
+  });
+  const isAvailable = (p: Product) => p.status !== "sold" && p.stock > 0;
 
   return (
     <section id="new" className="container py-20 md:py-28">
@@ -75,9 +89,9 @@ export const Products = () => {
               ) : (
                 <Placeholder label={`Foto — ${p.name}`} variant={variantFromStatus(p.status)} icon="sparkles" className="aspect-square" />
               )}
-              {p.badge && (
-                <span className={`absolute top-4 left-4 rounded-full px-3 py-1 text-[0.65rem] tracking-wider uppercase ${badgeClass(p.badge)}`}>
-                  {p.badge}
+              {(p.badge || !isAvailable(p)) && (
+                <span className={`absolute top-4 left-4 rounded-full border px-3 py-1 text-[0.65rem] tracking-wider uppercase ${badgeClass(!isAvailable(p) ? "sold" : p.badge)}`}>
+                  {!isAvailable(p) ? "Sold out" : p.badge}
                 </span>
               )}
             </div>
@@ -92,11 +106,12 @@ export const Products = () => {
                   Detail
                 </Button>
                 <Button
-                  onClick={() => cart.addItem({ id: p.id, name: p.name, price: p.price, image: p.images?.[0] })}
+                  onClick={() => cart.addItem(toCartProduct(p))}
                   variant="hanrose"
                   size="sm"
+                  disabled={!isAvailable(p)}
                 >
-                  <ShoppingBag className="h-4 w-4" /> Add
+                  <ShoppingBag className="h-4 w-4" /> {isAvailable(p) ? "Add" : "Sold"}
                 </Button>
               </div>
             </div>
@@ -120,9 +135,9 @@ export const Products = () => {
                 <X className="h-4 w-4" />
               </button>
               <div className="p-6">
-                {active.badge && (
-                  <span className={`inline-block rounded-full px-3 py-1 text-[0.65rem] tracking-wider uppercase ${badgeClass(active.badge)}`}>
-                    {active.badge}
+                {(active.badge || !isAvailable(active)) && (
+                  <span className={`inline-block rounded-full border px-3 py-1 text-[0.65rem] tracking-wider uppercase ${badgeClass(!isAvailable(active) ? "sold" : active.badge)}`}>
+                    {!isAvailable(active) ? "Sold out" : active.badge}
                   </span>
                 )}
                 <h3 className="mt-3 font-serif text-3xl">{active.name}</h3>
@@ -137,16 +152,19 @@ export const Products = () => {
                   </div>
                   <div className="rounded-2xl bg-blue-soft p-3">
                     <div className="uppercase tracking-wider text-blue">Size</div>
-                    <div className="mt-1 text-foreground/70">1 — 8 tahun</div>
+                    <div className="mt-1 text-foreground/70">
+                      {active.sizes?.length ? active.sizes.join(", ") : "Tanya admin"}
+                    </div>
                   </div>
                 </div>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   <Button
-                    onClick={() => cart.addItem({ id: active.id, name: active.name, price: active.price, image: active.images?.[0] })}
+                    onClick={() => cart.addItem(toCartProduct(active))}
                     variant="hanrose"
                     size="lg"
+                    disabled={!isAvailable(active)}
                   >
-                    <ShoppingBag className="h-4 w-4" /> Add to cart
+                    <ShoppingBag className="h-4 w-4" /> {isAvailable(active) ? "Add to cart" : "Sold out"}
                   </Button>
                   <Button asChild variant="whatsapp" size="lg">
                     <a href={buildWaLink(settings, active.name)} target="_blank" rel="noreferrer">

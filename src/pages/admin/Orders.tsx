@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MessageCircle, PackageCheck, RefreshCw } from "lucide-react";
+import { AlertTriangle, MessageCircle, PackageCheck, RefreshCw, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,8 @@ type Order = {
   shipping_fee: number;
   total: number;
   status: string;
+  expires_at: string;
+  stock_released: boolean;
   created_at: string;
   order_items: OrderItem[];
 };
@@ -51,6 +53,11 @@ const labels: Record<string, string> = {
 };
 
 const formatPrice = (value: number) => `Rp ${value.toLocaleString("id-ID")}`;
+
+const isExpiredHold = (order: Order) =>
+  order.status === "pending_payment" &&
+  !order.stock_released &&
+  new Date(order.expires_at).getTime() <= Date.now();
 
 const waLink = (order: Order) => {
   const items = order.order_items
@@ -116,6 +123,21 @@ export default function AdminOrders() {
         <div className="space-y-4">
           {orders.map((order) => (
             <Card key={order.id} className="rounded-2xl p-5">
+              {isExpiredHold(order) && (
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-destructive/30 bg-destructive/10 p-3">
+                  <div className="flex items-center gap-2 text-sm text-destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    Hold sudah lewat 30 menit. Stock masih tertahan sampai order dibatalkan.
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => updateOrder(order.id, { status: "cancelled" })}
+                  >
+                    <RotateCcw className="h-4 w-4" /> Release stock
+                  </Button>
+                </div>
+              )}
               <div className="grid gap-5 lg:grid-cols-[1fr_280px]">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -128,6 +150,18 @@ export default function AdminOrders() {
                         timeStyle: "short",
                       }).format(new Date(order.created_at))}
                     </span>
+                    {order.status === "pending_payment" && !order.stock_released && (
+                      <span className={`rounded-full px-3 py-1 text-xs font-medium ${
+                        isExpiredHold(order) ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"
+                      }`}>
+                        Hold sampai {new Intl.DateTimeFormat("id-ID", { timeStyle: "short" }).format(new Date(order.expires_at))}
+                      </span>
+                    )}
+                    {order.stock_released && (
+                      <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                        Stock released
+                      </span>
+                    )}
                   </div>
                   <h2 className="mt-3 font-serif text-2xl">{order.customer_name}</h2>
                   <p className="text-sm text-muted-foreground">{order.whatsapp}</p>
