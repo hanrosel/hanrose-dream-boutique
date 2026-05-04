@@ -3,7 +3,7 @@ import { Menu, X, MessageCircle } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const links = [
   { hash: "new",         label: "New Arrivals" },
@@ -57,6 +57,14 @@ export const Navbar = () => {
               </button>
             </li>
           ))}
+          <li>
+            <Link
+              to="/blog"
+              className="text-sm tracking-wide text-foreground/80 hover:text-pink transition-smooth"
+            >
+              Blog
+            </Link>
+          </li>
         </ul>
         <div className="hidden md:block">
           <Button asChild variant="hanrose" size="sm">
@@ -86,6 +94,15 @@ export const Navbar = () => {
                 </button>
               </li>
             ))}
+            <li>
+              <Link
+                to="/blog"
+                onClick={() => setOpen(false)}
+                className="block w-full py-2 text-foreground/80"
+              >
+                Blog
+              </Link>
+            </li>
             <li>
               <Button asChild variant="hanrose" className="w-full">
                 <a href={wa} target="_blank" rel="noreferrer">
