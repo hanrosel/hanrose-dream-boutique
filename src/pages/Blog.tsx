@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, ArrowRight } from "lucide-react";
@@ -7,6 +8,7 @@ import { Footer } from "@/components/hanrose/Footer";
 import { FloatingWA } from "@/components/hanrose/FloatingWA";
 import { Card } from "@/components/ui/card";
 import { defaultBlogPosts, type BlogPost } from "@/lib/blog";
+import { setSeo } from "@/lib/seo";
 
 const formatDate = (date: string | null) => {
   if (!date) return "Hanrose Journal";
@@ -18,6 +20,17 @@ const formatDate = (date: string | null) => {
 };
 
 export default function BlogPage() {
+  useEffect(() => {
+    setSeo({
+      title: "Blog Kidswear & Outfit Anak | Hanrose Atelier",
+      description:
+        "Inspirasi memilih baju anak premium yang nyaman, aesthetic, dan cocok untuk daily wear, birthday, photoshoot, sampai special occasion.",
+      image: "/blog/premium-kidswear-little-moments.png",
+      path: "/blog",
+      type: "website",
+    });
+  }, []);
+
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["blog_posts"],
     queryFn: async () => {
