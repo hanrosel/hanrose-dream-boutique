@@ -5,6 +5,9 @@ export type CartProduct = {
   name: string;
   price: number | null;
   image?: string | null;
+  sizes?: string[];
+  stock?: number;
+  status?: string;
 };
 
 export type CartItem = CartProduct & {
@@ -60,15 +63,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           const existing = current.find((item) => item.id === product.id);
           if (existing) {
             return current.map((item) =>
-              item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
+              item.id === product.id
+                ? { ...item, quantity: Math.min(item.quantity + 1, product.stock ?? item.stock ?? item.quantity + 1) }
+                : item,
             );
           }
           return [
             ...current,
             {
               ...product,
+              sizes: product.sizes ?? [],
+              stock: product.stock ?? 0,
+              status: product.status ?? "new",
               quantity: 1,
-              selectedSize: "",
+              selectedSize: product.sizes?.length === 1 ? product.sizes[0] : "",
               notes: "",
             },
           ];
@@ -82,7 +90,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
               ? {
                   ...item,
                   ...patch,
-                  quantity: Math.max(1, patch.quantity ?? item.quantity),
+                  quantity: Math.min(Math.max(1, patch.quantity ?? item.quantity), item.stock || patch.quantity || item.quantity),
                 }
               : item,
           ),

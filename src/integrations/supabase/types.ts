@@ -215,6 +215,7 @@ export type Database = {
           show_in_collection: boolean
           show_in_hero: boolean
           show_in_lookbook: boolean
+          sizes: string[]
           slug: string
           sort_order: number
           status: string
@@ -235,6 +236,7 @@ export type Database = {
           show_in_collection?: boolean
           show_in_hero?: boolean
           show_in_lookbook?: boolean
+          sizes?: string[]
           slug: string
           sort_order?: number
           status?: string
@@ -255,6 +257,7 @@ export type Database = {
           show_in_collection?: boolean
           show_in_hero?: boolean
           show_in_lookbook?: boolean
+          sizes?: string[]
           slug?: string
           sort_order?: number
           status?: string

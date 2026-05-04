@@ -78,11 +78,36 @@ export default function CheckoutPage() {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!cart.items.length) return toast.error("Cart masih kosong.");
+    const missingSize = cart.items.find((item) => item.sizes?.length && !item.selectedSize);
+    if (missingSize) return toast.error(`Pilih size untuk ${missingSize.name}.`);
     if (!form.customer_name.trim() || !form.whatsapp.trim() || !form.address.trim() || !form.city.trim()) {
       return toast.error("Nama, WhatsApp, alamat, dan kota wajib diisi.");
     }
 
     setBusy(true);
+    const ids = cart.items.map((item) => item.id);
+    const { data: latestProducts, error: productError } = await supabase
+      .from("products")
+      .select("id,name,stock,status,sizes")
+      .in("id", ids);
+
+    if (productError) {
+      setBusy(false);
+      return toast.error(productError.message);
+    }
+
+    for (const item of cart.items) {
+      const latest = latestProducts?.find((product) => product.id === item.id);
+      if (!latest || latest.status === "sold" || latest.stock < item.quantity) {
+        setBusy(false);
+        return toast.error(`${item.name} sudah sold out atau stok tidak cukup.`);
+      }
+      if (latest.sizes?.length && !latest.sizes.includes(item.selectedSize)) {
+        setBusy(false);
+        return toast.error(`Size ${item.selectedSize || "-"} untuk ${item.name} tidak tersedia.`);
+      }
+    }
+
     const orderId = crypto.randomUUID();
     const orderCode = generateOrderCode();
 
@@ -121,7 +146,10 @@ export default function CheckoutPage() {
     );
 
     setBusy(false);
-    if (itemsError) return toast.error(itemsError.message);
+    if (itemsError) {
+      await supabase.from("orders").delete().eq("id", orderId);
+      return toast.error(itemsError.message);
+    }
 
     const message = [
       `Halo Hanrose Atelier, saya mau konfirmasi order ${orderCode}.`,
