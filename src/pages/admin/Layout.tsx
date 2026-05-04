@@ -3,7 +3,7 @@ import { Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard, Package, FolderTree, Star,
-  FileText, Settings, LogOut, ChevronLeft, ChevronRight, Menu, X,
+  FileText, Settings, LogOut, ChevronLeft, ChevronRight, Menu, X, ClipboardList,
 } from "lucide-react";
 import logo from "@/assets/hanrose-logo.png";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { to: "/admin",            label: "Dashboard",  icon: LayoutDashboard, end: true },
+  { to: "/admin/orders",     label: "Orders",     icon: ClipboardList },
   { to: "/admin/products",   label: "Products",   icon: Package },
   { to: "/admin/categories", label: "Categories", icon: FolderTree },
   { to: "/admin/reviews",    label: "Reviews",    icon: Star },

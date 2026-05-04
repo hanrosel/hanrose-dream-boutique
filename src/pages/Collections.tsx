@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageCircle, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { MessageCircle, Sparkles, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Placeholder } from "@/components/hanrose/Placeholder";
 import { SimpleSlider } from "@/components/hanrose/SimpleSlider";
@@ -11,6 +11,7 @@ import { Footer } from "@/components/hanrose/Footer";
 import { FloatingWA } from "@/components/hanrose/FloatingWA";
 import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
 import { X } from "lucide-react";
+import { useCart } from "@/hooks/useCart";
 
 type Product = {
   id: string;
@@ -41,6 +42,7 @@ export default function CollectionsPage() {
   const [page, setPage] = useState(1);
   const [active, setActive] = useState<Product | null>(null);
   const { data: settings } = useSiteSettings();
+  const cart = useCart();
 
   const { data, isLoading } = useQuery({
     queryKey: ["collections_page", page],
@@ -117,6 +119,17 @@ export default function CollectionsPage() {
                     </span>
                     <Sparkles className="h-3 w-3 text-pink" />
                   </div>
+                  <Button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      cart.addItem({ id: p.id, name: p.name, price: p.price, image: p.images?.[0] });
+                    }}
+                    variant="hanroseOutline"
+                    size="sm"
+                    className="mt-3 w-full"
+                  >
+                    <ShoppingBag className="h-4 w-4" /> Add
+                  </Button>
                 </div>
               </article>
             ))}
@@ -188,11 +201,20 @@ export default function CollectionsPage() {
                     <div className="mt-1 text-foreground/70">1 — 8 tahun</div>
                   </div>
                 </div>
-                <Button asChild variant="whatsapp" className="mt-6 w-full" size="lg">
-                  <a href={buildWaLink(settings, active.name)} target="_blank" rel="noreferrer">
-                    <MessageCircle className="h-4 w-4" /> Order via WhatsApp
-                  </a>
-                </Button>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  <Button
+                    onClick={() => cart.addItem({ id: active.id, name: active.name, price: active.price, image: active.images?.[0] })}
+                    variant="hanrose"
+                    size="lg"
+                  >
+                    <ShoppingBag className="h-4 w-4" /> Add to cart
+                  </Button>
+                  <Button asChild variant="whatsapp" size="lg">
+                    <a href={buildWaLink(settings, active.name)} target="_blank" rel="noreferrer">
+                      <MessageCircle className="h-4 w-4" /> WhatsApp
+                    </a>
+                  </Button>
+                </div>
               </div>
             </div>
           )}
