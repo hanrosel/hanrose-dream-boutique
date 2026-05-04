@@ -28,14 +28,18 @@ type Cat = { id: string; name: string };
 
 const slugify = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const empty = {
-  name: "", slug: "", description: "", price: 0, stock: 0,
+  name: "", slug: "", description: "", price: "", stock: "",
   sizes: [] as string[],
   badge: "New", status: "new", category_id: null as string | null,
-  images: [] as string[], featured: true, sort_order: 0,
+  images: [] as string[], featured: true, sort_order: "",
   show_in_hero: false, show_in_collection: false, show_in_lookbook: false,
   link_url: "",
 };
 const PAGE_SIZE = 20;
+const toNumberOrNull = (value: string | number | null | undefined) =>
+  value === "" || value == null ? null : Number(value);
+const toNumberOrZero = (value: string | number | null | undefined) =>
+  value === "" || value == null ? 0 : Number(value);
 
 export default function AdminProducts() {
   const qc = useQueryClient();
@@ -87,10 +91,13 @@ export default function AdminProducts() {
       setEditing(p);
       setForm({
         name: p.name, slug: p.slug, description: p.description ?? "",
-        price: p.price ?? 0, stock: p.stock, badge: p.badge ?? "",
+        price: p.price == null ? "" : String(p.price),
+        stock: String(p.stock),
+        badge: p.badge ?? "",
         sizes: p.sizes ?? [],
         status: p.status, category_id: p.category_id, images: p.images ?? [],
-        featured: p.featured, sort_order: p.sort_order,
+        featured: p.featured,
+        sort_order: String(p.sort_order),
         show_in_hero: p.show_in_hero ?? false,
         show_in_collection: p.show_in_collection ?? false,
         show_in_lookbook: p.show_in_lookbook ?? false,
@@ -104,11 +111,15 @@ export default function AdminProducts() {
   };
 
   const save = async () => {
+    const stock = toNumberOrZero(form.stock);
     const payload = {
       ...form,
       slug: form.slug || slugify(form.name),
+      price: toNumberOrNull(form.price),
+      stock,
+      sort_order: toNumberOrZero(form.sort_order),
       link_url: form.link_url || null,
-      status: form.stock <= 0 ? "sold" : form.status,
+      status: stock <= 0 ? "sold" : form.status,
     };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
@@ -429,9 +440,36 @@ export default function AdminProducts() {
             </div>
             <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label>Price (Rp)</Label><Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: +e.target.value })} /></div>
-              <div><Label>Stock</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: +e.target.value })} /></div>
-              <div><Label>Sort</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: +e.target.value })} /></div>
+              <div>
+                <Label>Price (Rp)</Label>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label>Stock</Label>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  value={form.stock}
+                  onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label>Sort</Label>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  value={form.sort_order}
+                  onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
+                  placeholder="0"
+                />
+              </div>
             </div>
             <div>
               <Label>Available sizes</Label>
