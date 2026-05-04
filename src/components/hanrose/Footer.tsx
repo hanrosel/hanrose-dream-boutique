@@ -46,6 +46,7 @@ export const Footer = () => {
         <h4 className="font-serif text-lg mb-4">Hanrose</h4>
         <ul className="space-y-2 text-sm text-background/70">
           <li><a href="#about" className="hover:text-pink transition-smooth">About</a></li>
+          <li><a href="/blog" className="hover:text-pink transition-smooth">Blog</a></li>
           <li><a href="#reviews" className="hover:text-pink transition-smooth">Reviews</a></li>
           <li><a href="#faq" className="hover:text-pink transition-smooth">FAQ</a></li>
         </ul>
