@@ -14,7 +14,10 @@ const SOCIAL_BOT_PATTERN =
 const DEFAULT_TITLE = "Hanrose Atelier - Premium Kidswear Boutique";
 const DEFAULT_DESCRIPTION =
   "Baju anak premium, comfy, dan aesthetic untuk daily wear, photoshoot, birthday, dan special occasion.";
-const DEFAULT_IMAGE = "/blog/premium-kidswear-little-moments.png";
+const DEFAULT_IMAGE = "/hanrose-og-logo.png?v=3";
+const FALLBACK_SUPABASE_URL = "https://pddocaajqgpprnfoyszf.supabase.co";
+const FALLBACK_SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkZG9jYWFqcWdwcHJuZm95c3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MTM0ODIsImV4cCI6MjA5MzM4OTQ4Mn0.qfMKbQyei992Gz_u3cSqD2-GTAnEnCTNvIhrJlWwEEc";
 
 const escapeHtml = (value: string) =>
   value
@@ -31,8 +34,8 @@ const absoluteUrl = (requestUrl: URL, value?: string | null) => {
 };
 
 const fetchPost = async (slug: string): Promise<BlogPost | null> => {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || FALLBACK_SUPABASE_URL;
+  const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || FALLBACK_SUPABASE_KEY;
 
   if (!supabaseUrl || !supabaseKey) return null;
 
@@ -95,7 +98,7 @@ const renderPreviewHtml = (requestUrl: URL, post: BlogPost | null) => {
 };
 
 export const config = {
-  matcher: "/blog/:path*",
+  matcher: ["/", "/blog/:path*"],
 };
 
 export default async function middleware(request: Request) {
