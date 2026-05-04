@@ -53,6 +53,8 @@ export default function AdminBlog() {
     const payload: any = {
       ...form,
       slug: form.slug || slugify(form.title),
+      meta_title: form.meta_title || `${form.title} | Hanrose Atelier`,
+      meta_description: form.meta_description || form.excerpt || null,
       published_at: form.published ? new Date().toISOString() : null,
     };
     const { error } = editing

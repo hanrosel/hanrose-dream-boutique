@@ -9,6 +9,7 @@ import { FloatingWA } from "@/components/hanrose/FloatingWA";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
 import { defaultBlogPost, type BlogPost } from "@/lib/blog";
+import { setSeo } from "@/lib/seo";
 
 const formatDate = (date: string | null) => {
   if (!date) return "Hanrose Journal";
@@ -68,16 +69,14 @@ export default function BlogPostPage() {
 
   useEffect(() => {
     if (!post) return;
-    if (post.meta_title) document.title = post.meta_title;
-    if (post.meta_description) {
-      let el = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-      if (!el) {
-        el = document.createElement("meta");
-        el.setAttribute("name", "description");
-        document.head.appendChild(el);
-      }
-      el.content = post.meta_description;
-    }
+    setSeo({
+      title: post.meta_title || `${post.title} | Hanrose Atelier`,
+      description: post.meta_description || post.excerpt,
+      image: post.cover_image,
+      path: `/blog/${post.slug}`,
+      type: "article",
+      publishedTime: post.published_at,
+    });
   }, [post]);
 
   return (
