@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Package, Star, FileText, FolderTree } from "lucide-react";
+import { Package, Star, FileText, FolderTree, ClipboardList } from "lucide-react";
 
-const useCount = (table: "products" | "reviews" | "blog_posts" | "categories") =>
+const useCount = (table: "products" | "reviews" | "blog_posts" | "categories" | "orders") =>
   useQuery({
     queryKey: ["count", table],
     queryFn: async () => {
@@ -17,8 +17,10 @@ export default function AdminDashboard() {
   const reviews = useCount("reviews");
   const posts = useCount("blog_posts");
   const cats = useCount("categories");
+  const orders = useCount("orders");
 
   const cards = [
+    { label: "Orders", value: orders.data ?? "—", icon: ClipboardList },
     { label: "Products", value: products.data ?? "—", icon: Package },
     { label: "Categories", value: cats.data ?? "—", icon: FolderTree },
     { label: "Reviews", value: reviews.data ?? "—", icon: Star },

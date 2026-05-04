@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageCircle, X, Sparkles } from "lucide-react";
+import { MessageCircle, X, Sparkles, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Placeholder } from "./Placeholder";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
+import { useCart } from "@/hooks/useCart";
 
 type Product = {
   id: string;
@@ -32,6 +33,7 @@ const badgeClass = (b: string | null) => {
 export const Products = () => {
   const [active, setActive] = useState<Product | null>(null);
   const { data: settings } = useSiteSettings();
+  const cart = useCart();
   const { data: products = [] } = useQuery({
     queryKey: ["home_products"],
     queryFn: async () => {
@@ -85,14 +87,18 @@ export const Products = () => {
                 <span className="text-sm text-muted-foreground">{p.price ? `Rp ${p.price.toLocaleString("id-ID")}` : "Rp —"}</span>
                 <Sparkles className="h-3 w-3 text-pink" />
               </div>
-              <Button
-                onClick={() => setActive(p)}
-                variant="hanroseOutline"
-                className="mt-4 w-full"
-                size="sm"
-              >
-                <MessageCircle className="h-4 w-4" /> Detail via WhatsApp
-              </Button>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <Button onClick={() => setActive(p)} variant="hanroseOutline" size="sm">
+                  Detail
+                </Button>
+                <Button
+                  onClick={() => cart.addItem({ id: p.id, name: p.name, price: p.price, image: p.images?.[0] })}
+                  variant="hanrose"
+                  size="sm"
+                >
+                  <ShoppingBag className="h-4 w-4" /> Add
+                </Button>
+              </div>
             </div>
           </article>
         ))}
@@ -134,11 +140,20 @@ export const Products = () => {
                     <div className="mt-1 text-foreground/70">1 — 8 tahun</div>
                   </div>
                 </div>
-                <Button asChild variant="whatsapp" className="mt-6 w-full" size="lg">
-                  <a href={buildWaLink(settings, active.name)} target="_blank" rel="noreferrer">
-                    <MessageCircle className="h-4 w-4" /> Order via WhatsApp
-                  </a>
-                </Button>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  <Button
+                    onClick={() => cart.addItem({ id: active.id, name: active.name, price: active.price, image: active.images?.[0] })}
+                    variant="hanrose"
+                    size="lg"
+                  >
+                    <ShoppingBag className="h-4 w-4" /> Add to cart
+                  </Button>
+                  <Button asChild variant="whatsapp" size="lg">
+                    <a href={buildWaLink(settings, active.name)} target="_blank" rel="noreferrer">
+                      <MessageCircle className="h-4 w-4" /> WhatsApp
+                    </a>
+                  </Button>
+                </div>
               </div>
             </div>
           )}
