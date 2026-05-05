@@ -41,7 +41,7 @@ export const Lookbook = () => {
         <div className="text-center max-w-xl mx-auto">
           <span className="text-xs uppercase tracking-[0.3em] text-pink">Lookbook</span>
           <h2 className="mt-3 font-serif text-4xl md:text-5xl">
-            As seen on <em className="text-blue not-italic">@hanrose.atelier</em>
+            As seen on <em className="text-blue not-italic">@hanrose</em>
           </h2>
           <p className="mt-3 text-sm text-muted-foreground">
             Inspirasi outfit harian si kecil dari komunitas Hanrose.

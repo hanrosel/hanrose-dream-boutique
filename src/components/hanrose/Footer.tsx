@@ -6,7 +6,7 @@ import logo from "@/assets/hanrose-logo.png";
 export const Footer = () => {
   const { data: s } = useSiteSettings();
   const wa = buildWaLink(s);
-  const email = s?.email ?? "hello@hanrose.id";
+  const email = s?.email ?? "depashapanji@gmail.com";
   const socials = [
     { url: s?.instagram_url, icon: Instagram, label: "Instagram" },
     { url: wa, icon: MessageCircle, label: "WhatsApp", external: true },
