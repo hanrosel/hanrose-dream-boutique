@@ -22,7 +22,7 @@ type P = {
   sizes: string[];
   category_id: string | null; images: string[]; featured: boolean; sort_order: number;
   show_in_hero: boolean; show_in_collection: boolean; show_in_lookbook: boolean;
-  link_url: string | null;
+  link_url: string | null; is_visible: boolean;
 };
 type Cat = { id: string; name: string };
 
@@ -33,7 +33,7 @@ const empty = {
   badge: "New", status: "new", category_id: null as string | null,
   images: [] as string[], featured: true, sort_order: "",
   show_in_hero: false, show_in_collection: false, show_in_lookbook: false,
-  link_url: "",
+  link_url: "", is_visible: true,
 };
 const PAGE_SIZE = 20;
 const toNumberOrNull = (value: string | number | null | undefined) =>
@@ -102,6 +102,7 @@ export default function AdminProducts() {
         show_in_collection: p.show_in_collection ?? false,
         show_in_lookbook: p.show_in_lookbook ?? false,
         link_url: p.link_url ?? "",
+        is_visible: p.is_visible ?? true,
       });
     } else {
       setEditing(null);
@@ -141,7 +142,7 @@ export default function AdminProducts() {
   const EXPORT_COLS = [
     "name","slug","description","price","stock","badge","status",
     "sizes","category_id","images","featured","sort_order",
-    "show_in_hero","show_in_collection","show_in_lookbook","link_url",
+    "show_in_hero","show_in_collection","show_in_lookbook","link_url","is_visible",
   ] as const;
 
   // Export JSON — strips id/timestamps so it can be re-imported cleanly
@@ -176,7 +177,7 @@ export default function AdminProducts() {
     const example = [
       "Dress Bunga Pink","dress-bunga-pink","Dress cantik bahan katun lembut",
       "150000","5","New","new","1Y|2Y|3Y","","","true","0",
-      "false","true","false","https://wa.me/6287887297885",
+      "false","true","false","https://wa.me/6287887297885","true",
     ].join(",");
     const csv = [[...EXPORT_COLS].join(","), example].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -192,6 +193,7 @@ export default function AdminProducts() {
     show_in_hero:       rest.show_in_hero === true || rest.show_in_hero === "true",
     show_in_collection: rest.show_in_collection === true || rest.show_in_collection === "true",
     show_in_lookbook:   rest.show_in_lookbook === true || rest.show_in_lookbook === "true",
+    is_visible:         rest.is_visible === true || rest.is_visible === "true" || rest.is_visible == null,
     images: Array.isArray(rest.images)
       ? rest.images
       : typeof rest.images === "string" && rest.images
@@ -358,12 +360,13 @@ export default function AdminProducts() {
               <th className="p-1 text-left font-medium hidden sm:table-cell">Stok</th>
               <th className="p-1 text-left font-medium hidden md:table-cell">Size</th>
               <th className="p-1 text-left font-medium">Status</th>
+              <th className="p-1 text-center font-medium hidden lg:table-cell">Visible</th>
               <th className="p-1 w-12"></th>
             </tr>
           </thead>
           <tbody>
             {paginated.length === 0 && (
-              <tr><td colSpan={8} className="text-center text-muted-foreground py-6 text-xs">Tidak ada produk</td></tr>
+              <tr><td colSpan={9} className="text-center text-muted-foreground py-6 text-xs">Tidak ada produk</td></tr>
             )}
             {paginated.map((p) => (
               <tr key={p.id} className="border-b last:border-0 hover:bg-muted/20">
@@ -394,6 +397,27 @@ export default function AdminProducts() {
                 {/* Status */}
                 <td className="p-1">
                   <span className="px-1 py-0.5 rounded bg-muted capitalize">{p.status}</span>
+                </td>
+                {/* Visibility */}
+                <td className="p-1 text-center hidden lg:table-cell">
+                  <div className="flex justify-center">
+                    <Switch
+                      checked={p.is_visible}
+                      onCheckedChange={async (checked) => {
+                        const { error } = await supabase
+                          .from("products")
+                          .update({ is_visible: checked })
+                          .eq("id", p.id);
+                        if (error) {
+                          toast.error(error.message);
+                        } else {
+                          toast.success(checked ? "Produk ditampilkan" : "Produk disembunyikan");
+                          qc.invalidateQueries({ queryKey: ["admin_products"] });
+                        }
+                      }}
+                      className="scale-75"
+                    />
+                  </div>
                 </td>
                 {/* Actions */}
                 <td className="p-1">
@@ -518,6 +542,10 @@ export default function AdminProducts() {
             <div className="flex items-center gap-2">
               <Switch checked={form.featured} onCheckedChange={(v) => setForm({ ...form, featured: v })} />
               <Label>Featured (tampil di New Arrivals)</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={form.is_visible} onCheckedChange={(v) => setForm({ ...form, is_visible: v })} />
+              <Label>Visible (tampil di homepage & collections)</Label>
             </div>
 
             {/* Homepage placement */}

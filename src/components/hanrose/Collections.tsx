@@ -14,14 +14,14 @@ const ICONS    = ["heart", "crown", "sparkles", "sparkles", "heart", "crown", "s
 export const Collections = () => {
   const { data: products = [] } = useQuery({
     queryKey: ["collection_products"],
-    queryFn: async () => {
+    queryFn: async (): Promise<P[]> => {
       const { data, error } = await supabase
         .from("products")
         .select("id,name,images,link_url,sort_order")
-        .eq("show_in_collection", true)
+        .match({ show_in_collection: true, is_visible: true } as any)
         .order("sort_order");
       if (error) throw error;
-      return data as P[];
+      return (data || []) as P[];
     },
     staleTime: 60_000,
   });

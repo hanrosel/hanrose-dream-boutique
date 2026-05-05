@@ -44,6 +44,7 @@ export const Products = () => {
         .from("products")
         .select("id,name,description,price,badge,status,images,stock,sizes")
         .eq("featured", true)
+        .eq("is_visible" as any, true)
         .order("sort_order")
         .limit(12);
       if (error) throw error;
