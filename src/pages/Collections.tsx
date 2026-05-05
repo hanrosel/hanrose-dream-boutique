@@ -55,6 +55,7 @@ export default function CollectionsPage() {
       const { data, error, count } = await supabase
         .from("products")
         .select("id,name,description,price,badge,status,images,stock,sizes", { count: "exact" })
+        .eq("is_visible" as any, true)
         .order("sort_order")
         .range(from, to);
       if (error) throw error;

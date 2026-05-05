@@ -8,18 +8,26 @@ import { ShoppingBag } from "lucide-react";
 
 const VARIANTS = ["pink", "blue", "mixed", "cream"] as const;
 
+type LookbookProduct = {
+  id: string;
+  name: string;
+  images: string[];
+  link_url: string | null;
+};
+
 export const Lookbook = () => {
   const { data: products = [] } = useQuery({
     queryKey: ["lookbook_products"],
-    queryFn: async () => {
+    queryFn: async (): Promise<LookbookProduct[]> => {
       const { data, error } = await supabase
         .from("products")
         .select("id,name,images,link_url,sort_order")
-        .eq("show_in_lookbook", true)
+        .match({ show_in_lookbook: true, is_visible: true } as any)
         .order("sort_order")
         .limit(4);
+      
       if (error) throw error;
-      return data as { id: string; name: string; images: string[]; link_url: string | null }[];
+      return (data || []) as LookbookProduct[];
     },
     staleTime: 60_000,
   });

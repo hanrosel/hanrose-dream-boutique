@@ -18,6 +18,7 @@ export const Hero = () => {
         .from("products")
         .select("id,name,images,link_url")
         .eq("show_in_hero", true)
+        .eq("is_visible" as any, true)
         .order("sort_order");
       if (error) throw error;
       return data as { id: string; name: string; images: string[]; link_url: string | null }[];
