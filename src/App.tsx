@@ -1,8 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useEffect } from "react";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import CollectionsPage from "./pages/Collections.tsx";
@@ -22,6 +23,22 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { CartDrawer } from "@/components/hanrose/CartDrawer";
 
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
+
+const GA_ID = "G-SZV4D36T8K";
+
+function PageTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    window.gtag?.("config", GA_ID, { page_path: location.pathname + location.search });
+  }, [location]);
+  return null;
+}
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -32,6 +49,7 @@ const App = () => (
       <BrowserRouter>
         <CartProvider>
           <AuthProvider>
+            <PageTracker />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/collections" element={<CollectionsPage />} />
