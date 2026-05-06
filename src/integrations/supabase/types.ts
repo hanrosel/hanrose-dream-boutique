@@ -86,6 +86,42 @@ export type Database = {
         }
         Relationships: []
       }
+      home_sections: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          images: string[]
+          label: string
+          link_url: string | null
+          section: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          images?: string[]
+          label: string
+          link_url?: string | null
+          section: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          images?: string[]
+          label?: string
+          link_url?: string | null
+          section?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
@@ -215,6 +251,7 @@ export type Database = {
           featured: boolean
           id: string
           images: string[]
+          is_visible: boolean
           link_url: string | null
           name: string
           price: number | null
@@ -236,6 +273,7 @@ export type Database = {
           featured?: boolean
           id?: string
           images?: string[]
+          is_visible?: boolean
           link_url?: string | null
           name: string
           price?: number | null
@@ -257,6 +295,7 @@ export type Database = {
           featured?: boolean
           id?: string
           images?: string[]
+          is_visible?: boolean
           link_url?: string | null
           name?: string
           price?: number | null

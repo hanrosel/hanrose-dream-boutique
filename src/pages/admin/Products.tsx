@@ -51,7 +51,7 @@ export default function AdminProducts() {
     queryFn: async () => {
       const { data, error } = await supabase.from("products").select("*").order("sort_order");
       if (error) throw error;
-      return data as P[];
+      return data as unknown as P[];
     },
   });
   const { data: cats = [] } = useQuery({
@@ -123,8 +123,8 @@ export default function AdminProducts() {
       status: stock <= 0 ? "sold" : form.status,
     };
     const { error } = editing
-      ? await supabase.from("products").update(payload).eq("id", editing.id)
-      : await supabase.from("products").insert(payload);
+      ? await supabase.from("products").update(payload as any).eq("id", editing.id)
+      : await supabase.from("products").insert(payload as any);
     if (error) return toast.error(error.message);
     toast.success("Saved");
     setOpen(false);
@@ -215,9 +215,9 @@ export default function AdminProducts() {
   });
 
   const upsertRows = async (rows: Record<string, unknown>[]) => {
-    const { error } = await supabase
-      .from("products")
-      .upsert(rows as unknown as P[], { onConflict: "slug" });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from("products") as any)
+      .upsert(rows, { onConflict: "slug" });
     if (error) return toast.error(error.message);
     toast.success(`${rows.length} produk diimport`);
     qc.invalidateQueries({ queryKey: ["admin_products"] });
@@ -317,7 +317,6 @@ export default function AdminProducts() {
             <SelectItem value="all">Status</SelectItem>
             <SelectItem value="new">New</SelectItem>
             <SelectItem value="limited">Limited</SelectItem>
-            <SelectItem value="preloved">Preloved</SelectItem>
             <SelectItem value="sold">Sold</SelectItem>
           </SelectContent>
         </Select>
@@ -404,8 +403,8 @@ export default function AdminProducts() {
                     <Switch
                       checked={p.is_visible}
                       onCheckedChange={async (checked) => {
-                        const { error } = await supabase
-                          .from("products")
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const { error } = await (supabase.from("products") as any)
                           .update({ is_visible: checked })
                           .eq("id", p.id);
                         if (error) {
@@ -523,7 +522,6 @@ export default function AdminProducts() {
                   <SelectContent>
                     <SelectItem value="new">New</SelectItem>
                     <SelectItem value="limited">Limited</SelectItem>
-                    <SelectItem value="preloved">Preloved</SelectItem>
                     <SelectItem value="sold">Sold out</SelectItem>
                   </SelectContent>
                 </Select>

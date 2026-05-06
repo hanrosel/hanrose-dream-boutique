@@ -2,10 +2,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 const faqs = [
   { q: "Bagaimana cara cek size yang pas?", a: "Setiap produk memiliki size chart. Kamu juga bisa kirim umur, tinggi, dan berat anak via WhatsApp untuk rekomendasi size yang paling pas." },
-  { q: "Apa kondisi item preloved?", a: "Semua preloved dikurasi ketat. Mayoritas like new, dengan deskripsi kondisi detail dan foto real saat kamu chat WhatsApp." },
   { q: "Bagaimana pengiriman & estimasi sampai?", a: "Kami kirim dari Indonesia menggunakan ekspedisi pilihan kamu (JNE, J&T, SiCepat, dll). Estimasi 1–4 hari kerja tergantung lokasi." },
   { q: "Metode pembayaran apa saja?", a: "Transfer bank (BCA, Mandiri, BRI) dan QRIS. Detail pembayaran akan diberikan saat konfirmasi order via WhatsApp." },
-  { q: "Apakah bisa retur atau tukar?", a: "Item new bisa ditukar dalam 2x24 jam jika ada defect dari kami. Item preloved dijual as-is sesuai deskripsi yang dijelaskan sebelum order." },
+  { q: "Apakah bisa retur atau tukar?", a: "Semua item bisa ditukar dalam 2x24 jam jika ada defect dari kami, sesuai deskripsi yang dijelaskan sebelum order." },
 ];
 
 export const Faq = () => (
