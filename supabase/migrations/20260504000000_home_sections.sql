@@ -25,7 +25,7 @@ INSERT INTO public.home_sections (section, label, sort_order) VALUES
   ('collection', 'Daily Wear',           0),
   ('collection', 'Dress & Occasion',     1),
   ('collection', 'Boys Collection',      2),
-  ('collection', 'Preloved Gems',        3),
+  ('collection', 'Special Edition',      3),
   ('about',      'About / Brand Story',  0),
   ('lookbook',   'Daily soft pink ootd', 0),
   ('lookbook',   'Sunday brunch look',   1),

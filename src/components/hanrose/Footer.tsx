@@ -24,7 +24,7 @@ export const Footer = () => {
         </a>
         <p className="mt-4 text-sm text-background/70 max-w-sm leading-relaxed">
           Quality & comfy for your little ones. Premium kidswear boutique —
-          new arrivals & curated preloved gems.
+          new arrivals & curated collections.
         </p>
         <div className="mt-6 flex gap-3">
           {socials.map((sc) => (
@@ -39,7 +39,7 @@ export const Footer = () => {
         <ul className="space-y-2 text-sm text-background/70">
           <li><a href="#new" className="hover:text-pink transition-smooth">New Arrivals</a></li>
           <li><a href="#collections" className="hover:text-pink transition-smooth">Collections</a></li>
-          <li><a href="#collections" className="hover:text-pink transition-smooth">Preloved Gems</a></li>
+          <li><a href="#collections" className="hover:text-pink transition-smooth">Collections</a></li>
         </ul>
       </div>
       <div>

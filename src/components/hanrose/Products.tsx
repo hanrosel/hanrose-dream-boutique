@@ -22,14 +22,12 @@ type Product = {
 
 const variantFromStatus = (s: string): "pink" | "blue" | "mixed" | "cream" => {
   if (s === "limited") return "mixed";
-  if (s === "preloved") return "cream";
   return "pink";
 };
 const badgeClass = (b: string | null) => {
   const x = (b ?? "").toLowerCase();
   if (x.includes("sold")) return "bg-foreground text-background border-white/70";
   if (x.includes("limited")) return "bg-foreground text-background border-white/70";
-  if (x.includes("preloved")) return "bg-blue text-secondary-foreground border-white/70";
   return "bg-white/95 text-foreground border-pink/40 shadow-soft";
 };
 

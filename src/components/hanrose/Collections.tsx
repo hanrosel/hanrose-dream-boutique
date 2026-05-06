@@ -72,7 +72,7 @@ export const Collections = () => {
               </div>
             ))
           : /* fallback placeholders */
-            (["Daily Wear", "Dress & Occasion", "Boys Collection", "Preloved Gems"] as const).map((name, i) => (
+            (["Daily Wear", "Dress & Occasion", "Boys Collection", "Special Edition"] as const).map((name, i) => (
               <div key={name} className="group overflow-hidden rounded-3xl bg-white shadow-card animate-fade-up" style={{ animationDelay: `${i * 0.08}s` }}>
                 <Placeholder label={`Foto ${name}`} variant={VARIANTS[i]} icon={ICONS[i]} className="aspect-[3/4]" />
                 <div className="p-5">

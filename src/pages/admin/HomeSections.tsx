@@ -51,7 +51,7 @@ export default function AdminHomeSections() {
         .order("section")
         .order("sort_order");
       if (error) throw error;
-      return data as Row[];
+      return data as unknown as Row[];
     },
   });
 

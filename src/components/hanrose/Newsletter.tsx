@@ -22,7 +22,7 @@ export const Newsletter = () => {
         <Sparkles className="absolute bottom-6 right-10 h-4 w-4 text-white/70 animate-sparkle" style={{ animationDelay: "1.2s" }} />
         <h2 className="font-serif text-4xl md:text-5xl text-white">Join Hanrose Updates</h2>
         <p className="mt-3 text-white/90 max-w-md mx-auto text-sm">
-          Be the first to know about new drops, restocks, dan curated preloved gems.
+          Be the first to know about new drops, restocks, dan koleksi terbaru kami.
         </p>
         <form onSubmit={submit} className="mt-8 mx-auto max-w-md flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
