@@ -1,5 +1,5 @@
 import { Crown, Sparkles, Heart } from "lucide-react";
-import logo from "@/assets/hanrose-logo.png";
+import logo from "@/assets/hanrose-logo.webp";
 
 const icons = { crown: Crown, sparkles: Sparkles, heart: Heart };
 

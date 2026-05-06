@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import logo from "@/assets/hanrose-logo.png";
+import logo from "@/assets/hanrose-logo.webp";
 
 export default function AdminLogin() {
   const { signIn, user, isAdmin, loading } = useAuth();
