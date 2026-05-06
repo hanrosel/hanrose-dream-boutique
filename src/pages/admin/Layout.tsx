@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Package, FolderTree, Star,
   FileText, Settings, LogOut, ChevronLeft, ChevronRight, Menu, X, ClipboardList,
 } from "lucide-react";
-import logo from "@/assets/hanrose-logo.png";
+import logo from "@/assets/hanrose-logo.webp";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

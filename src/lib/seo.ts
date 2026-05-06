@@ -2,7 +2,7 @@ const SITE_NAME = "Hanrose Atelier";
 const DEFAULT_TITLE = "Hanrose Atelier - Premium Kidswear Boutique";
 const DEFAULT_DESCRIPTION =
   "Baju anak premium, comfy, dan aesthetic untuk daily wear, photoshoot, birthday, dan special occasion.";
-const DEFAULT_IMAGE = "/hanrose-og-logo.png?v=3";
+const DEFAULT_IMAGE = "/hanrose-og-logo.webp?v=4";
 
 type SeoInput = {
   title?: string | null;

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logo from "@/assets/hanrose-logo.png";
+import logo from "@/assets/hanrose-logo.webp";
 
 export const Logo = ({ className = "" }: { className?: string }) => (
   <Link to="/" className={`flex items-center gap-2 ${className}`} aria-label="Hanrose Atelier">

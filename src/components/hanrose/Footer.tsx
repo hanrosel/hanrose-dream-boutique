@@ -1,7 +1,7 @@
 import { Instagram, MessageCircle, Mail, Heart, ShoppingBag, Music2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings, buildWaLink } from "@/hooks/useSiteSettings";
-import logo from "@/assets/hanrose-logo.png";
+import logo from "@/assets/hanrose-logo.webp";
 
 export const Footer = () => {
   const { data: s } = useSiteSettings();
